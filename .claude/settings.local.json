@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node --version 2>/dev/null && npm --version 2>/dev/null || echo \"Node.js not found\")",
+      "Bash(find \"/c/Program Files \\(x86\\)/Steam/steamapps/common/Cities Skylines II/Cities2_Data/StreamingAssets\" -maxdepth 4 -type d 2>/dev/null | head -30)",
+      "Bash(ls \"/c/Program Files \\(x86\\)/Steam/steamapps/common/Cities Skylines II/Cities2_Data/\" 2>/dev/null | head -30)",
+      "Bash(ls \"/c/Program Files \\(x86\\)/Steam/steamapps/common/Cities Skylines II/Cities2_Data/Managed/\" | grep -i \"UI\\\\|colossal\" | head -30)",
+      "WebSearch",
+      "WebFetch(domain:cs2.paradoxwikis.com)",
+      "WebFetch(domain:github.com)",
+      "Bash(find \"/c/Users/dnorr/AppData/LocalLow/Colossal Order/Cities Skylines II\" -name \"*.json\" 2>/dev/null | head -20)"
+    ]
+  }
+}

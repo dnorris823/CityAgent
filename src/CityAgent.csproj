@@ -1,0 +1,78 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <AssemblyName>CityAgent</AssemblyName>
+    <RootNamespace>CityAgent</RootNamespace>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
+    <!--
+      Set CS2_INSTALL_PATH as a user environment variable, e.g.:
+        $env:CS2_INSTALL_PATH = "C:\Program Files (x86)\Steam\steamapps\common\Cities Skylines II"
+      Or override here directly for local dev (do not commit your local path):
+    -->
+    <CS2Dir Condition="'$(CS2_INSTALL_PATH)' != ''">$(CS2_INSTALL_PATH)</CS2Dir>
+    <CS2Dir Condition="'$(CS2Dir)' == ''">C:\Program Files (x86)\Steam\steamapps\common\Cities Skylines II</CS2Dir>
+    <ManagedDir>$(CS2Dir)\Cities2_Data\Managed</ManagedDir>
+
+    <!-- Output directly to the CS2 mods folder so you can test immediately after build -->
+    <ModOutputDir>$(APPDATA)\..\LocalLow\Colossal Order\Cities Skylines II\Mods\CityAgent</ModOutputDir>
+    <OutputPath>$(ModOutputDir)</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+    <!-- Suppress harmless version conflict warnings from game DLLs targeting older .NET -->
+    <NoWarn>MSB3277</NoWarn>
+  </PropertyGroup>
+
+  <!-- Game DLL references — all Private=False so they are NOT copied to output -->
+  <ItemGroup>
+    <Reference Include="Colossal.Core">
+      <HintPath>$(ManagedDir)\Colossal.Core.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Colossal.IO.AssetDatabase">
+      <HintPath>$(ManagedDir)\Colossal.IO.AssetDatabase.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Colossal.Localization">
+      <HintPath>$(ManagedDir)\Colossal.Localization.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Colossal.Logging">
+      <HintPath>$(ManagedDir)\Colossal.Logging.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="cohtml.NET">
+      <HintPath>$(ManagedDir)\cohtml.NET.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Colossal.UI">
+      <HintPath>$(ManagedDir)\Colossal.UI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Colossal.UI.Binding">
+      <HintPath>$(ManagedDir)\Colossal.UI.Binding.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Game">
+      <HintPath>$(ManagedDir)\Game.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.Entities">
+      <HintPath>$(ManagedDir)\Unity.Entities.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.Mathematics">
+      <HintPath>$(ManagedDir)\Unity.Mathematics.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(ManagedDir)\UnityEngine.CoreModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+
+  <!-- No post-build copy needed: webpack outputs directly to the mod root folder -->
+
+</Project>
