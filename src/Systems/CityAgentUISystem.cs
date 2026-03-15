@@ -1,125 +1,109 @@
-using Colossal.UI;
 using Colossal.UI.Binding;
-using Game;
 using Game.UI;
+using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using UnityEngine;
 
 namespace CityAgent.Systems
 {
-    /// <summary>
-    /// Phase 1: UI bridge system.
-    ///
-    /// Exposes two bindings to the React UI:
-    ///   - panelVisible (bool)  — whether the CityAgent panel is open
-    ///   - togglePanel (trigger) — flips panelVisible
-    ///
-    /// Also bootstraps the UI module by calling ExecuteScript to import CityAgent.mjs,
-    /// since the game only auto-imports .mjs modules for Paradox Mods subscribed mods,
-    /// not local development mods.
-    /// </summary>
     public partial class CityAgentUISystem : UISystemBase
     {
-        private const string BindingGroup = "cityAgent";
+        private const string kGroup = "cityAgent";
 
-        private ValueBinding<bool> m_PanelVisible = null!;
+        private ValueBinding<bool>   m_PanelVisible  = null!;
+        private ValueBinding<string> m_MessagesJson  = null!;
+        private ValueBinding<bool>   m_IsLoading     = null!;
+        private ValueBinding<bool>   m_HasScreenshot = null!;
+
+        private CityDataSystem  m_CityData  = null!;
+        private ClaudeAPISystem m_ClaudeAPI = null!;
+
+        private readonly List<ChatMessage> m_History = new List<ChatMessage>();
+        private string? m_PendingBase64Image = null;
+        private KeyCode m_ScreenshotKey = KeyCode.F8;
+
+        // File-based screenshot capture (CaptureScreenshotAsTexture returns null in UIUpdate phase)
+        private string m_ScreenshotPath = "";
+        private int m_ScreenshotWaitFrames = -1; // -1 = not waiting
 
         protected override void OnCreate()
         {
             base.OnCreate();
             Mod.Log.Info($"{nameof(CityAgentUISystem)}.{nameof(OnCreate)}");
 
-            m_PanelVisible = new ValueBinding<bool>(BindingGroup, "panelVisible", false);
+            m_PanelVisible  = new ValueBinding<bool>  (kGroup, "panelVisible",  false);
+            m_MessagesJson  = new ValueBinding<string>(kGroup, "messagesJson",  "[]");
+            m_IsLoading     = new ValueBinding<bool>  (kGroup, "isLoading",     false);
+            m_HasScreenshot = new ValueBinding<bool>  (kGroup, "hasScreenshot", false);
+
             AddBinding(m_PanelVisible);
-            AddBinding(new TriggerBinding(BindingGroup, "togglePanel", TogglePanel));
+            AddBinding(m_MessagesJson);
+            AddBinding(m_IsLoading);
+            AddBinding(m_HasScreenshot);
 
-            Mod.Log.Info("CityAgent UI bindings registered.");
+            AddBinding(new TriggerBinding        (kGroup, "togglePanel",      TogglePanel));
+            AddBinding(new TriggerBinding<string>(kGroup, "sendMessage",      OnSendMessage));
+            AddBinding(new TriggerBinding        (kGroup, "clearChat",        OnClearChat));
+            AddBinding(new TriggerBinding        (kGroup, "removeScreenshot", OnRemoveScreenshot));
+            AddBinding(new TriggerBinding        (kGroup, "captureScreenshot", CaptureScreenshot));
 
-            // Explicitly import our UI module.
-            // The game doesn't auto-import local mod .mjs files the way it does for
-            // subscribed mods. We trigger the import here and pass window["cs2/modding"]
-            // as the module registry (it's exposed as a window global like the other CS2 APIs).
-            LoadUI();
-        }
+            m_CityData  = World.GetOrCreateSystemManaged<CityDataSystem>();
+            m_ClaudeAPI = World.GetOrCreateSystemManaged<ClaudeAPISystem>();
 
-        private void LoadUI()
-        {
-            // Phase 1: inject a button + panel directly into the DOM.
-            // The game's module registry (needed for React component injection) is only
-            // passed to subscribed mods automatically. For local dev mods we inject raw HTML,
-            // which is sufficient to validate the full toolchain for Phase 1.
-            // C# bindings (panelVisible, togglePanel) still work via engine.trigger.
-            const string script = @"
-(function() {
-    if (document.getElementById('city-agent-btn')) return; // already injected
+            // Parse keybind from settings
+            var setting = Mod.ActiveSetting;
+            if (setting != null && Enum.TryParse<KeyCode>(setting.ScreenshotKeybind, out var key))
+                m_ScreenshotKey = key;
 
-    var btn = document.createElement('button');
-    btn.id = 'city-agent-btn';
-    btn.textContent = '\uD83C\uDFD9 CityAgent';
-    btn.style.cssText = [
-        'position:fixed',
-        'bottom:80px',
-        'right:20px',
-        'z-index:10000',
-        'background:#1a2a3a',
-        'color:#e0e8f0',
-        'border:1px solid #3a5a7a',
-        'border-radius:6px',
-        'padding:8px 16px',
-        'font-size:14px',
-        'cursor:pointer',
-        'font-family:inherit'
-    ].join(';');
+            m_ScreenshotPath = Path.Combine(Application.temporaryCachePath, "cityagent_screenshot.png");
 
-    var panel = document.createElement('div');
-    panel.id = 'city-agent-panel';
-    panel.style.cssText = [
-        'display:none',
-        'position:fixed',
-        'bottom:130px',
-        'right:20px',
-        'width:360px',
-        'background:#0f1e2e',
-        'border:1px solid #3a5a7a',
-        'border-radius:8px',
-        'z-index:9999',
-        'color:#e0e8f0',
-        'font-family:inherit',
-        'overflow:hidden'
-    ].join(';');
-    panel.innerHTML =
-        '<div style=""padding:10px 14px;background:#162436;border-bottom:1px solid #3a5a7a;font-size:14px;font-weight:600;display:flex;justify-content:space-between;align-items:center"">' +
-            '<span>CityAgent AI Advisor</span>' +
-            '<button onclick=""document.getElementById(\'city-agent-panel\').style.display=\'none\';engine.trigger(\'cityAgent\',\'togglePanel\')"" style=""background:none;border:none;color:#7a9ab5;font-size:18px;cursor:pointer;line-height:1"">&#x2715;</button>' +
-        '</div>' +
-        '<div style=""padding:14px;font-size:13px;line-height:1.5;color:#5a7a95;font-style:italic;text-align:center;margin-top:40px"">' +
-            'CityAgent is ready.<br><br>City data and AI chat coming soon.' +
-        '</div>';
-
-    btn.onclick = function() {
-        var p = document.getElementById('city-agent-panel');
-        var visible = p.style.display !== 'none';
-        p.style.display = visible ? 'none' : 'block';
-        engine.trigger('cityAgent', 'togglePanel');
-    };
-
-    document.body.appendChild(panel);
-    document.body.appendChild(btn);
-    console.error('[CityAgent] UI injected successfully.');
-})();
-";
-            try
-            {
-                UIManager.defaultUIView.View.ExecuteScript(script);
-                Mod.Log.Info("CityAgent UI module import triggered.");
-            }
-            catch (System.Exception ex)
-            {
-                Mod.Log.Error($"CityAgent failed to trigger UI import: {ex.Message}");
-            }
+            Mod.Log.Info($"CityAgent UI bindings registered. Screenshot key: {m_ScreenshotKey}");
         }
 
         protected override void OnUpdate()
         {
-            // Phase 1: nothing to poll each frame.
+            // 1. Screenshot keybind
+            if (Input.GetKeyDown(m_ScreenshotKey))
+                CaptureScreenshot();
+
+            // 2. Poll for screenshot file (written by Unity at end of frame)
+            if (m_ScreenshotWaitFrames >= 0)
+            {
+                m_ScreenshotWaitFrames++;
+                if (m_ScreenshotWaitFrames > 10) // give up after ~10 frames
+                {
+                    Mod.Log.Error("Screenshot file was never written.");
+                    m_ScreenshotWaitFrames = -1;
+                }
+                else if (File.Exists(m_ScreenshotPath))
+                {
+                    try
+                    {
+                        byte[] png = File.ReadAllBytes(m_ScreenshotPath);
+                        File.Delete(m_ScreenshotPath);
+                        m_PendingBase64Image = Convert.ToBase64String(png);
+                        m_HasScreenshot.Update(true);
+                        Mod.Log.Info($"Screenshot loaded: {png.Length} bytes.");
+                    }
+                    catch (Exception ex)
+                    {
+                        Mod.Log.Error($"Screenshot read failed: {ex.Message}");
+                    }
+                    m_ScreenshotWaitFrames = -1;
+                }
+            }
+
+            // 3. Drain pending API result
+            string? result = m_ClaudeAPI.PendingResult;
+            if (result != null)
+            {
+                m_ClaudeAPI.PendingResult = null;
+                m_History.Add(new ChatMessage { role = "assistant", content = result });
+                PushMessagesBinding();
+                m_IsLoading.Update(false);
+            }
         }
 
         protected override void OnDestroy()
@@ -132,6 +116,64 @@ namespace CityAgent.Systems
         {
             m_PanelVisible.Update(!m_PanelVisible.value);
             Mod.Log.Info($"Panel toggled — now {(m_PanelVisible.value ? "open" : "closed")}");
+        }
+
+        private void OnSendMessage(string userText)
+        {
+            if (string.IsNullOrWhiteSpace(userText)) return;
+
+            bool hadImage = m_PendingBase64Image != null;
+            m_History.Add(new ChatMessage { role = "user", content = userText, hadImage = hadImage });
+            PushMessagesBinding();
+
+            m_ClaudeAPI.BeginRequest(userText, m_PendingBase64Image);
+            m_PendingBase64Image = null;
+            m_HasScreenshot.Update(false);
+            m_IsLoading.Update(true);
+        }
+
+        private void OnClearChat()
+        {
+            m_History.Clear();
+            PushMessagesBinding();
+            Mod.Log.Info("Chat history cleared.");
+        }
+
+        private void OnRemoveScreenshot()
+        {
+            m_PendingBase64Image = null;
+            m_HasScreenshot.Update(false);
+        }
+
+        private void CaptureScreenshot()
+        {
+            try
+            {
+                // Delete any stale file from a previous capture
+                if (File.Exists(m_ScreenshotPath))
+                    File.Delete(m_ScreenshotPath);
+
+                // Queue capture — Unity writes the file at end of frame
+                ScreenCapture.CaptureScreenshot(m_ScreenshotPath);
+                m_ScreenshotWaitFrames = 0;
+                Mod.Log.Info($"Screenshot queued → {m_ScreenshotPath}");
+            }
+            catch (Exception ex)
+            {
+                Mod.Log.Error($"Screenshot capture failed: {ex.Message}");
+            }
+        }
+
+        private void PushMessagesBinding()
+        {
+            m_MessagesJson.Update(JsonConvert.SerializeObject(m_History));
+        }
+
+        private class ChatMessage
+        {
+            public string role     { get; set; } = "";
+            public string content  { get; set; } = "";
+            public bool   hadImage { get; set; } = false;
         }
     }
 }

@@ -20,6 +20,8 @@ namespace CityAgent
 
         private Setting? m_Setting;
 
+        public static Setting? ActiveSetting { get; private set; }
+
         // CS2 uses "ui-mods" as the shared coui:// host for all mod UI assets.
         // Adding our mod root to it makes coui://ui-mods/CityAgent.mjs resolve correctly.
         internal const string UIHostName = "ui-mods";
@@ -48,9 +50,14 @@ namespace CityAgent
             m_Setting.RegisterInOptionsUI();
             GameManager.instance.localizationManager.AddSource("en-US", new LocaleEN(m_Setting));
             AssetDatabase.global.LoadSettings(nameof(CityAgent), m_Setting, new Setting(this));
+            ActiveSetting = m_Setting;
 
             // Schedule our UI system to run during the UI update phase
             updateSystem.UpdateAt<Systems.CityAgentUISystem>(SystemUpdatePhase.UIUpdate);
+
+            // Schedule ECS data reader and API system during game simulation
+            updateSystem.UpdateAt<Systems.CityDataSystem>(SystemUpdatePhase.GameSimulation);
+            updateSystem.UpdateAt<Systems.ClaudeAPISystem>(SystemUpdatePhase.GameSimulation);
         }
 
         public void OnDispose()
@@ -64,6 +71,7 @@ namespace CityAgent
                 m_Setting.UnregisterInOptionsUI();
                 m_Setting = null;
             }
+            ActiveSetting = null;
         }
     }
 }

@@ -15,32 +15,44 @@ namespace CityAgent
         public const string kSection = "Main";
         public const string kGeneralGroup = "General";
 
+        private const string DefaultSystemPrompt =
+            "You are CityAgent, an AI city planning advisor in the style of CityPlannerPlays. " +
+            "Analyze the city screenshot and data, then provide engaging narrative commentary and " +
+            "specific build recommendations. Be enthusiastic but practical. Focus on what would " +
+            "make the most impact for the city's current challenges.";
+
         public Setting(IMod mod) : base(mod) { }
 
-        /// <summary>
-        /// Anthropic API key. Stored in the mod's settings file (not in source control).
-        /// </summary>
         [SettingsUISection(kSection, kGeneralGroup)]
         [SettingsUITextInput]
-        public string AnthropicApiKey { get; set; } = string.Empty;
+        public string OllamaApiKey { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Claude model to use. Defaults to the latest Sonnet.
-        /// </summary>
         [SettingsUISection(kSection, kGeneralGroup)]
         [SettingsUITextInput]
-        public string ClaudeModel { get; set; } = "claude-sonnet-4-6";
+        public string OllamaModel { get; set; } = "kimi-k2.5:cloud";
+
+        [SettingsUISection(kSection, kGeneralGroup)]
+        [SettingsUITextInput]
+        public string OllamaBaseUrl { get; set; } = "https://ollama.com";
+
+        [SettingsUISection(kSection, kGeneralGroup)]
+        [SettingsUITextInput]
+        public string SystemPrompt { get; set; } = DefaultSystemPrompt;
+
+        [SettingsUISection(kSection, kGeneralGroup)]
+        [SettingsUITextInput]
+        public string ScreenshotKeybind { get; set; } = "F8";
 
         public override void SetDefaults()
         {
-            AnthropicApiKey = string.Empty;
-            ClaudeModel = "claude-sonnet-4-6";
+            OllamaApiKey      = string.Empty;
+            OllamaModel       = "kimi-k2.5:cloud";
+            OllamaBaseUrl     = "https://ollama.com";
+            SystemPrompt      = DefaultSystemPrompt;
+            ScreenshotKeybind = "F8";
         }
     }
 
-    /// <summary>
-    /// English locale strings for the settings panel.
-    /// </summary>
     public class LocaleEN : IDictionarySource
     {
         private readonly Setting m_Setting;
@@ -56,10 +68,16 @@ namespace CityAgent
                 { m_Setting.GetSettingsLocaleID(), "CityAgent" },
                 { m_Setting.GetOptionTabLocaleID(Setting.kSection), "Main" },
                 { m_Setting.GetOptionGroupLocaleID(Setting.kGeneralGroup), "General" },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.AnthropicApiKey)), "Anthropic API Key" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.AnthropicApiKey)), "Your Anthropic API key for Claude access. Never share this." },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ClaudeModel)), "Claude Model" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.ClaudeModel)), "Claude model ID (e.g. claude-sonnet-4-6)" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OllamaApiKey)),      "Ollama API Key" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.OllamaApiKey)),       "Your Ollama cloud API key. Never share this." },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OllamaModel)),       "Model" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.OllamaModel)),        "Model ID (e.g. kimi-k2.5:cloud)" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OllamaBaseUrl)),     "API Base URL" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.OllamaBaseUrl)),      "OpenAI-compatible endpoint base URL (e.g. https://ollama.com)" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.SystemPrompt)),      "System Prompt" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.SystemPrompt)),       "Advisor persona prompt sent to the AI at the start of every conversation." },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ScreenshotKeybind)), "Screenshot Keybind" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.ScreenshotKeybind)),  "Unity KeyCode name for capturing a screenshot (default: F8)." },
             };
         }
 
