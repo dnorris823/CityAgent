@@ -30,6 +30,7 @@ namespace CityAgent
         {
             Log.Info(nameof(OnLoad));
 
+            string modDir = "";
             if (GameManager.instance.modManager.TryGetExecutableAsset(this, out var asset))
             {
                 Log.Info($"CityAgent mod asset path: {asset.path}");
@@ -40,7 +41,7 @@ namespace CityAgent
                 // auto-imports coui://{hostName}/index.js to mount the mod UI.
                 // Register the mod root folder (not a UI subfolder) under "ui-mods".
                 // This makes coui://ui-mods/CityAgent.mjs serve our UI module.
-                var modDir = Path.GetDirectoryName(asset.path)!;
+                modDir = Path.GetDirectoryName(asset.path)!;
                 UIManager.defaultUISystem.AddHostLocation(UIHostName, modDir, false, 0);
                 Log.Info($"CityAgent UI registered: coui://{UIHostName}/ -> {modDir}");
             }
@@ -58,6 +59,14 @@ namespace CityAgent
             // Schedule ECS data reader and API system during game simulation
             updateSystem.UpdateAt<Systems.CityDataSystem>(SystemUpdatePhase.GameSimulation);
             updateSystem.UpdateAt<Systems.ClaudeAPISystem>(SystemUpdatePhase.GameSimulation);
+
+            // Schedule narrative memory system and pass the mod directory
+            updateSystem.UpdateAt<Systems.NarrativeMemorySystem>(SystemUpdatePhase.GameSimulation);
+            if (!string.IsNullOrEmpty(modDir))
+            {
+                var memorySystem = updateSystem.World.GetOrCreateSystemManaged<Systems.NarrativeMemorySystem>();
+                memorySystem.SetModDir(modDir);
+            }
         }
 
         public void OnDispose()

@@ -8,13 +8,14 @@ using System.Collections.Generic;
 namespace CityAgent
 {
     [FileLocation(nameof(CityAgent))]
-    [SettingsUIGroupOrder(kGeneralGroup, kUIGroup)]
-    [SettingsUIShowGroupName(kGeneralGroup, kUIGroup)]
+    [SettingsUIGroupOrder(kGeneralGroup, kUIGroup, kMemoryGroup)]
+    [SettingsUIShowGroupName(kGeneralGroup, kUIGroup, kMemoryGroup)]
     public class Setting : ModSetting
     {
         public const string kSection = "Main";
         public const string kGeneralGroup = "General";
         public const string kUIGroup = "UI";
+        public const string kMemoryGroup = "Memory";
 
         private const string DefaultSystemPrompt =
             "You are CityAgent, an AI city planning advisor in the style of CityPlannerPlays. " +
@@ -56,6 +57,14 @@ namespace CityAgent
         [SettingsUISlider(min = 11, max = 32, step = 1)]
         public int FontSize { get; set; } = 14;
 
+        [SettingsUISection(kSection, kMemoryGroup)]
+        [SettingsUISlider(min = 10, max = 200, step = 5)]
+        public int MaxNarrativeLogEntries { get; set; } = 50;
+
+        [SettingsUISection(kSection, kMemoryGroup)]
+        [SettingsUISlider(min = 5, max = 100, step = 5)]
+        public int MaxChatHistorySessions { get; set; } = 20;
+
         public override void SetDefaults()
         {
             OllamaApiKey      = string.Empty;
@@ -63,9 +72,11 @@ namespace CityAgent
             OllamaBaseUrl     = "https://ollama.com";
             SystemPrompt      = DefaultSystemPrompt;
             ScreenshotKeybind = "F8";
-            PanelWidth        = 520;
-            PanelHeight       = 650;
-            FontSize          = 14;
+            PanelWidth                = 520;
+            PanelHeight               = 650;
+            FontSize                  = 14;
+            MaxNarrativeLogEntries    = 50;
+            MaxChatHistorySessions    = 20;
         }
     }
 
@@ -101,6 +112,11 @@ namespace CityAgent
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.PanelHeight)),  "Default height of the CityAgent panel in pixels (400–1200). You can also drag panel edges to resize." },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.FontSize)),    "Font Size" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.FontSize)),     "Base font size for all panel text (11–32)." },
+                { m_Setting.GetOptionGroupLocaleID(Setting.kMemoryGroup), "Memory Settings" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.MaxNarrativeLogEntries)),  "Max Narrative Log Entries" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.MaxNarrativeLogEntries)),   "Maximum entries in narrative-log.md before older entries are archived (10–200)." },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.MaxChatHistorySessions)),  "Max Chat History Sessions" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.MaxChatHistorySessions)),   "Number of recent chat sessions to keep. Older sessions are auto-deleted (5–100)." },
             };
         }
 

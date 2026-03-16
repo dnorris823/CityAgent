@@ -15,8 +15,9 @@ namespace CityAgent.Systems
     {
         private static readonly HttpClient s_Http = new HttpClient();
 
-        private CityDataSystem   m_CityDataSystem = null!;
-        private CityToolRegistry m_ToolRegistry   = null!;
+        private CityDataSystem         m_CityDataSystem      = null!;
+        private NarrativeMemorySystem  m_NarrativeMemory     = null!;
+        private CityToolRegistry       m_ToolRegistry        = null!;
 
         public volatile string? PendingResult = null;
         private bool m_RequestInFlight = false;
@@ -26,13 +27,22 @@ namespace CityAgent.Systems
             base.OnCreate();
             Mod.Log.Info($"{nameof(ClaudeAPISystem)}.{nameof(OnCreate)}");
 
-            m_CityDataSystem = World.GetOrCreateSystemManaged<CityDataSystem>();
+            m_CityDataSystem  = World.GetOrCreateSystemManaged<CityDataSystem>();
+            m_NarrativeMemory = World.GetOrCreateSystemManaged<NarrativeMemorySystem>();
 
             m_ToolRegistry = new CityToolRegistry();
             m_ToolRegistry.Register(new GetPopulationTool(m_CityDataSystem));
             m_ToolRegistry.Register(new GetBuildingDemandTool(m_CityDataSystem));
             m_ToolRegistry.Register(new GetWorkforceTool(m_CityDataSystem));
             m_ToolRegistry.Register(new GetZoningSummaryTool(m_CityDataSystem));
+
+            // Memory tools
+            m_ToolRegistry.Register(new ReadMemoryFileTool(m_NarrativeMemory));
+            m_ToolRegistry.Register(new WriteMemoryFileTool(m_NarrativeMemory));
+            m_ToolRegistry.Register(new AppendNarrativeLogTool(m_NarrativeMemory));
+            m_ToolRegistry.Register(new CreateMemoryFileTool(m_NarrativeMemory));
+            m_ToolRegistry.Register(new DeleteMemoryFileTool(m_NarrativeMemory));
+            m_ToolRegistry.Register(new ListMemoryFilesTool(m_NarrativeMemory));
 
             Mod.Log.Info($"Tool registry initialised with {m_ToolRegistry.ToolCount} tools.");
         }
@@ -80,6 +90,10 @@ namespace CityAgent.Systems
                 string model     = (setting.OllamaModel ?? "").Trim();
                 string sysPrompt = setting.SystemPrompt ?? "";
 
+                // Inject always-loaded narrative memory context
+                if (m_NarrativeMemory.IsInitialized)
+                    sysPrompt += m_NarrativeMemory.GetAlwaysInjectedContext();
+
                 string masked = apiKey.Length > 8
                     ? apiKey.Substring(0, 4) + "..." + apiKey.Substring(apiKey.Length - 4)
                     : "(too short)";
@@ -105,7 +119,7 @@ namespace CityAgent.Systems
                 var toolsArray = JArray.Parse(m_ToolRegistry.GetToolsJsonOpenAI());
                 string endpoint = $"{baseUrl}/api/chat";
 
-                for (int iteration = 0; iteration < 5; iteration++)
+                for (int iteration = 0; iteration < 10; iteration++)
                 {
                     var requestBody = new JObject
                     {

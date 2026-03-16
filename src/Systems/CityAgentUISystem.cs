@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 
 namespace CityAgent.Systems
@@ -20,8 +21,9 @@ namespace CityAgent.Systems
         private ValueBinding<int>    m_PanelHeight   = null!;
         private ValueBinding<int>    m_FontSize      = null!;
 
-        private CityDataSystem  m_CityData  = null!;
-        private ClaudeAPISystem m_ClaudeAPI = null!;
+        private CityDataSystem        m_CityData       = null!;
+        private ClaudeAPISystem       m_ClaudeAPI      = null!;
+        private NarrativeMemorySystem m_NarrativeMemory = null!;
 
         private readonly List<ChatMessage> m_History = new List<ChatMessage>();
         private string? m_PendingBase64Image = null;
@@ -31,6 +33,7 @@ namespace CityAgent.Systems
         private string m_ScreenshotPath = "";
         private int m_ScreenshotWaitFrames = -1; // -1 = not waiting
         private int m_SettingsPollCounter = 0;
+        private bool m_MemoryInitialized = false;
 
         protected override void OnCreate()
         {
@@ -61,8 +64,9 @@ namespace CityAgent.Systems
             AddBinding(new TriggerBinding        (kGroup, "removeScreenshot", OnRemoveScreenshot));
             AddBinding(new TriggerBinding        (kGroup, "captureScreenshot", CaptureScreenshot));
 
-            m_CityData  = World.GetOrCreateSystemManaged<CityDataSystem>();
-            m_ClaudeAPI = World.GetOrCreateSystemManaged<ClaudeAPISystem>();
+            m_CityData        = World.GetOrCreateSystemManaged<CityDataSystem>();
+            m_ClaudeAPI       = World.GetOrCreateSystemManaged<ClaudeAPISystem>();
+            m_NarrativeMemory = World.GetOrCreateSystemManaged<NarrativeMemorySystem>();
 
             // Parse keybind from settings
             if (setting != null && Enum.TryParse<KeyCode>(setting.ScreenshotKeybind, out var key))
@@ -75,6 +79,40 @@ namespace CityAgent.Systems
 
         protected override void OnUpdate()
         {
+            // 0. Initialize narrative memory on first update (city name may not be available in OnCreate)
+            if (!m_MemoryInitialized && !m_NarrativeMemory.IsInitialized)
+            {
+                try
+                {
+                    m_NarrativeMemory.Initialize();
+                    m_MemoryInitialized = true;
+
+                    // Restore last session's chat history
+                    var lastSession = m_NarrativeMemory.LoadLatestChatSession();
+                    if (lastSession != null)
+                    {
+                        var restored = NarrativeMemorySystem.ParseChatSession(lastSession);
+                        foreach (var (role, content, hadImage) in restored)
+                            m_History.Add(new ChatMessage { role = role, content = content, hadImage = hadImage });
+
+                        if (m_History.Count > 0)
+                        {
+                            PushMessagesBinding();
+                            Mod.Log.Info($"Restored {m_History.Count} messages from previous session.");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Mod.Log.Error($"Memory initialization failed: {ex.Message}");
+                    m_MemoryInitialized = true; // Don't retry
+                }
+            }
+            else if (!m_MemoryInitialized && m_NarrativeMemory.IsInitialized)
+            {
+                m_MemoryInitialized = true;
+            }
+
             // 1. Screenshot keybind
             if (Input.GetKeyDown(m_ScreenshotKey))
                 CaptureScreenshot();
@@ -114,6 +152,7 @@ namespace CityAgent.Systems
                 m_History.Add(new ChatMessage { role = "assistant", content = result });
                 PushMessagesBinding();
                 m_IsLoading.Update(false);
+                PersistChatSession();
             }
 
             // 4. Poll settings for UI dimension/font changes (~once per second)
@@ -154,10 +193,15 @@ namespace CityAgent.Systems
             m_PendingBase64Image = null;
             m_HasScreenshot.Update(false);
             m_IsLoading.Update(true);
+
+            // Persist chat session after each message
+            PersistChatSession();
         }
 
         private void OnClearChat()
         {
+            // Save transcript before clearing
+            PersistChatSession();
             m_History.Clear();
             PushMessagesBinding();
             Mod.Log.Info("Chat history cleared.");
@@ -191,6 +235,23 @@ namespace CityAgent.Systems
         private void PushMessagesBinding()
         {
             m_MessagesJson.Update(JsonConvert.SerializeObject(m_History));
+        }
+
+        private void PersistChatSession()
+        {
+            if (!m_NarrativeMemory.IsInitialized || m_History.Count == 0) return;
+
+            try
+            {
+                var messages = m_History.Select(m => (m.role, m.content, m.hadImage));
+                string markdown = NarrativeMemorySystem.ChatHistoryToMarkdown(
+                    messages, m_NarrativeMemory.SessionNumber, m_NarrativeMemory.CityName);
+                m_NarrativeMemory.SaveChatSession(markdown);
+            }
+            catch (Exception ex)
+            {
+                Mod.Log.Error($"Failed to persist chat session: {ex.Message}");
+            }
         }
 
         private class ChatMessage
