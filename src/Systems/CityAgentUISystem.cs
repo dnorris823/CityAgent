@@ -200,11 +200,14 @@ namespace CityAgent.Systems
 
         private void OnClearChat()
         {
-            // Save transcript before clearing
             PersistChatSession();
+            m_NarrativeMemory.StartNewSession();
             m_History.Clear();
             PushMessagesBinding();
-            Mod.Log.Info("Chat history cleared.");
+            m_PendingBase64Image = null;
+            m_HasScreenshot.Update(false);
+            m_IsLoading.Update(false);
+            Mod.Log.Info("New conversation started.");
         }
 
         private void OnRemoveScreenshot()

@@ -1,5 +1,6 @@
 import React, { Component, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { bindValue, useValue, trigger } from "cs2/api";
+import { renderMarkdown } from "../utils/renderMarkdown";
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -304,8 +305,8 @@ const CityAgentInner: React.FC = () => {
           <header className="ca-panel__header" onMouseDown={handleHeaderMouseDown}>
             <span className="ca-panel__header-title">CityAgent AI Advisor</span>
             <div className="ca-panel__header-actions" onMouseDown={stopDragPropagation}>
-              <button className="ca-btn-icon" onClick={() => safeTrigger("cityAgent", "clearChat")}>
-                Clear
+              <button className="ca-btn-icon ca-btn-new-chat" onClick={() => safeTrigger("cityAgent", "clearChat")}>
+                + New Chat
               </button>
               <button className="ca-btn-icon" onClick={() => safeTrigger("cityAgent", "togglePanel")}>
                 ✕
@@ -319,7 +320,11 @@ const CityAgentInner: React.FC = () => {
                 {msg.hadImage && (
                   <span className="ca-bubble__image-badge">screenshot attached</span>
                 )}
-                <span className="ca-bubble__text">{msg.content}</span>
+                {msg.role === "assistant" ? (
+                  <div className="ca-bubble__text ca-markdown" dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.content) }} />
+                ) : (
+                  <span className="ca-bubble__text">{msg.content}</span>
+                )}
               </div>
             ))}
             {isLoading && (

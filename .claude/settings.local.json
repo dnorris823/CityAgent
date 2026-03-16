@@ -75,7 +75,10 @@
       "Bash(/usr/bin/grep -i \"save\\\\|GameManager\\\\|configuration\" /c/Users/dnorr/.claude/projects/C--Coding-Projects-CityAgent-Working-CityAgent/0cd65408-ac0f-4751-9181-670a6a753c4d/tool-results/b2xbdwr59.txt | /usr/bin/head -50)",
       "Bash(MANAGED=\"/c/Program Files \\(x86\\)/Steam/steamapps/common/Cities Skylines II/Cities2_Data/Managed\" && /c/Users/dnorr/.dotnet/tools/ilspycmd.exe -t \"Game.City.CityConfigurationSystem\" \"$MANAGED/Game.dll\" 2>&1)",
       "Bash(MANAGED=\"/c/Program Files \\(x86\\)/Steam/steamapps/common/Cities Skylines II/Cities2_Data/Managed\" && /c/Users/dnorr/.dotnet/tools/ilspycmd.exe -t \"Game.SceneFlow.GameManager\" \"$MANAGED/Game.dll\" 2>&1 | /usr/bin/head -200)",
-      "Bash(MANAGED=\"/c/Program Files \\(x86\\)/Steam/steamapps/common/Cities Skylines II/Cities2_Data/Managed\" && /c/Users/dnorr/.dotnet/tools/ilspycmd.exe -t \"Game.UI.InGame.CityInfoUISystem\" \"$MANAGED/Game.dll\" 2>&1 | /usr/bin/head -200)"
+      "Bash(MANAGED=\"/c/Program Files \\(x86\\)/Steam/steamapps/common/Cities Skylines II/Cities2_Data/Managed\" && /c/Users/dnorr/.dotnet/tools/ilspycmd.exe -t \"Game.UI.InGame.CityInfoUISystem\" \"$MANAGED/Game.dll\" 2>&1 | /usr/bin/head -200)",
+      "Bash(cd \"C:/Coding Projects/CityAgent/Working/CityAgent/UI\" && npm install marked dompurify && npm install --save-dev @types/dompurify)",
+      "Bash(cd \"C:/Coding Projects/CityAgent/Working/CityAgent/UI\" && npm uninstall dompurify @types/dompurify 2>&1)",
+      "Bash(cd \"C:/Coding Projects/CityAgent/Working/CityAgent/UI\" && npm uninstall marked 2>&1)"
     ]
   }
 }

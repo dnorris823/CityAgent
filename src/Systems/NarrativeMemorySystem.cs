@@ -111,6 +111,13 @@ namespace CityAgent.Systems
             Mod.Log.Info($"[NarrativeMemorySystem] Initialized. Session #{m_SessionNumber}");
         }
 
+        public void StartNewSession()
+        {
+            if (!m_Initialized) return;
+            m_SessionNumber++;
+            Mod.Log.Info($"[NarrativeMemorySystem] New session started: #{m_SessionNumber}");
+        }
+
         private string ResolveCityName(string? cityNameOverride)
         {
             if (!string.IsNullOrWhiteSpace(cityNameOverride))
