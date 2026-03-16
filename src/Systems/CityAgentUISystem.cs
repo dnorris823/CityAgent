@@ -16,6 +16,9 @@ namespace CityAgent.Systems
         private ValueBinding<string> m_MessagesJson  = null!;
         private ValueBinding<bool>   m_IsLoading     = null!;
         private ValueBinding<bool>   m_HasScreenshot = null!;
+        private ValueBinding<int>    m_PanelWidth    = null!;
+        private ValueBinding<int>    m_PanelHeight   = null!;
+        private ValueBinding<int>    m_FontSize      = null!;
 
         private CityDataSystem  m_CityData  = null!;
         private ClaudeAPISystem m_ClaudeAPI = null!;
@@ -27,6 +30,7 @@ namespace CityAgent.Systems
         // File-based screenshot capture (CaptureScreenshotAsTexture returns null in UIUpdate phase)
         private string m_ScreenshotPath = "";
         private int m_ScreenshotWaitFrames = -1; // -1 = not waiting
+        private int m_SettingsPollCounter = 0;
 
         protected override void OnCreate()
         {
@@ -38,10 +42,18 @@ namespace CityAgent.Systems
             m_IsLoading     = new ValueBinding<bool>  (kGroup, "isLoading",     false);
             m_HasScreenshot = new ValueBinding<bool>  (kGroup, "hasScreenshot", false);
 
+            var setting = Mod.ActiveSetting;
+            m_PanelWidth  = new ValueBinding<int>(kGroup, "panelWidth",  setting?.PanelWidth  ?? 520);
+            m_PanelHeight = new ValueBinding<int>(kGroup, "panelHeight", setting?.PanelHeight ?? 650);
+            m_FontSize    = new ValueBinding<int>(kGroup, "fontSize",    setting?.FontSize    ?? 14);
+
             AddBinding(m_PanelVisible);
             AddBinding(m_MessagesJson);
             AddBinding(m_IsLoading);
             AddBinding(m_HasScreenshot);
+            AddBinding(m_PanelWidth);
+            AddBinding(m_PanelHeight);
+            AddBinding(m_FontSize);
 
             AddBinding(new TriggerBinding        (kGroup, "togglePanel",      TogglePanel));
             AddBinding(new TriggerBinding<string>(kGroup, "sendMessage",      OnSendMessage));
@@ -53,7 +65,6 @@ namespace CityAgent.Systems
             m_ClaudeAPI = World.GetOrCreateSystemManaged<ClaudeAPISystem>();
 
             // Parse keybind from settings
-            var setting = Mod.ActiveSetting;
             if (setting != null && Enum.TryParse<KeyCode>(setting.ScreenshotKeybind, out var key))
                 m_ScreenshotKey = key;
 
@@ -103,6 +114,19 @@ namespace CityAgent.Systems
                 m_History.Add(new ChatMessage { role = "assistant", content = result });
                 PushMessagesBinding();
                 m_IsLoading.Update(false);
+            }
+
+            // 4. Poll settings for UI dimension/font changes (~once per second)
+            if (++m_SettingsPollCounter >= 60)
+            {
+                m_SettingsPollCounter = 0;
+                var s = Mod.ActiveSetting;
+                if (s != null)
+                {
+                    if (s.PanelWidth  != m_PanelWidth.value)  m_PanelWidth.Update(s.PanelWidth);
+                    if (s.PanelHeight != m_PanelHeight.value) m_PanelHeight.Update(s.PanelHeight);
+                    if (s.FontSize    != m_FontSize.value)    m_FontSize.Update(s.FontSize);
+                }
             }
         }
 

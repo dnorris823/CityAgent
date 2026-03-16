@@ -37,7 +37,15 @@
       "Bash(cd \"C:/Coding Projects/CityAgent/Working/CityAgent/UI\" && npm run build 2>&1)",
       "Bash(find \"/c/Users/dnorr/AppData/LocalLow/Colossal Order/Cities Skylines II\" -type f -name \"*.log\" 2>/dev/null | head -20)",
       "Bash(cd \"C:\\\\Coding Projects\\\\CityAgent\\\\Working\\\\CityAgent\\\\UI\" && npm run build 2>&1)",
-      "WebFetch(domain:docs.ollama.com)"
+      "WebFetch(domain:docs.ollama.com)",
+      "Bash(find \"C:\\\\Coding Projects\\\\CityAgent\\\\Working\\\\CityAgent\\\\UI\\\\src\" -type f \\\\\\( -name \"*.tsx\" -o -name \"*.ts\" -o -name \"*.css\" \\\\\\) 2>/dev/null | sort)",
+      "Bash(find \"C:/Program Files \\(x86\\)/Steam/steamapps/common/Cities Skylines II/Cities2_Data/Managed/\" -name \"Game.dll\" -type f 2>/dev/null | head -1)",
+      "WebFetch(domain:ps1ke.github.io)",
+      "WebFetch(domain:www.paradoxinteractive.com)",
+      "Bash(grep -r \"SettingsUISlider\" \"C:/Program Files \\(x86\\)/Steam/steamapps/common/Cities Skylines II/Cities2_Data/Managed/Game.dll\" 2>/dev/null | head -3; grep -c \"SettingsUISlider\" \"C:/Program Files \\(x86\\)/Steam/steamapps/common/Cities Skylines II/Cities2_Data/Managed/Game.dll\" 2>/dev/null || echo \"binary grep not suitable, trying strings approach\"; cat \"C:/Program Files \\(x86\\)/Steam/steamapps/common/Cities Skylines II/Cities2_Data/Managed/Game.dll\" 2>/dev/null | tr -d '\\\\0' | grep -o \"SettingsUISlider[A-Za-z]*\" | head -5)",
+      "Bash(gh search:*)",
+      "Bash(cd \"/c/Coding Projects/CityAgent/Working/CityAgent/src\" && dotnet build -c Release 2>&1)",
+      "Bash(cd \"/c/Coding Projects/CityAgent/Working/CityAgent/UI\" && npm run build 2>&1)"
     ]
   }
 }

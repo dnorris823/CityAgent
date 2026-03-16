@@ -8,12 +8,13 @@ using System.Collections.Generic;
 namespace CityAgent
 {
     [FileLocation(nameof(CityAgent))]
-    [SettingsUIGroupOrder(kGeneralGroup)]
-    [SettingsUIShowGroupName(kGeneralGroup)]
+    [SettingsUIGroupOrder(kGeneralGroup, kUIGroup)]
+    [SettingsUIShowGroupName(kGeneralGroup, kUIGroup)]
     public class Setting : ModSetting
     {
         public const string kSection = "Main";
         public const string kGeneralGroup = "General";
+        public const string kUIGroup = "UI";
 
         private const string DefaultSystemPrompt =
             "You are CityAgent, an AI city planning advisor in the style of CityPlannerPlays. " +
@@ -43,6 +44,18 @@ namespace CityAgent
         [SettingsUITextInput]
         public string ScreenshotKeybind { get; set; } = "F8";
 
+        [SettingsUISection(kSection, kUIGroup)]
+        [SettingsUISlider(min = 400, max = 1600, step = 10)]
+        public int PanelWidth { get; set; } = 520;
+
+        [SettingsUISection(kSection, kUIGroup)]
+        [SettingsUISlider(min = 400, max = 1200, step = 10)]
+        public int PanelHeight { get; set; } = 650;
+
+        [SettingsUISection(kSection, kUIGroup)]
+        [SettingsUISlider(min = 11, max = 32, step = 1)]
+        public int FontSize { get; set; } = 14;
+
         public override void SetDefaults()
         {
             OllamaApiKey      = string.Empty;
@@ -50,6 +63,9 @@ namespace CityAgent
             OllamaBaseUrl     = "https://ollama.com";
             SystemPrompt      = DefaultSystemPrompt;
             ScreenshotKeybind = "F8";
+            PanelWidth        = 520;
+            PanelHeight       = 650;
+            FontSize          = 14;
         }
     }
 
@@ -78,6 +94,13 @@ namespace CityAgent
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.SystemPrompt)),       "Advisor persona prompt sent to the AI at the start of every conversation." },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ScreenshotKeybind)), "Screenshot Keybind" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.ScreenshotKeybind)),  "Unity KeyCode name for capturing a screenshot (default: F8)." },
+                { m_Setting.GetOptionGroupLocaleID(Setting.kUIGroup), "UI Settings" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.PanelWidth)),  "Panel Width" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.PanelWidth)),   "Default width of the CityAgent panel in pixels (400–1600). You can also drag panel edges to resize." },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.PanelHeight)), "Panel Height" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.PanelHeight)),  "Default height of the CityAgent panel in pixels (400–1200). You can also drag panel edges to resize." },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.FontSize)),    "Font Size" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.FontSize)),     "Base font size for all panel text (11–32)." },
             };
         }
 

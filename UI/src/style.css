@@ -1,55 +1,116 @@
-/* CityAgent — chat panel styles (Coherent GT / CS2 compatible) */
+/* CityAgent — CS2-native theme (Coherent GT compatible)
+ *
+ * Design:  Semi-transparent panels matching CS2's frosted-glass dark UI.
+ * Layout:  No hardcoded width/height on .ca-panel — set via inline styles from bindings.
+ * Scaling: Padding/margins use em so everything scales with the fontSize binding.
+ * Compat:  No gap, no ::placeholder, no :disabled — Coherent GT safe.
+ */
 
+/* ── Toggle button ── */
 .ca-toggle-btn {
   position: fixed;
   bottom: 80px;
   right: 20px;
   z-index: 99999;
-  background: #1a2a3a;
+  background: rgba(20, 36, 56, 0.92);
   color: #e0e8f0;
-  border: 1px solid #3a5a7a;
+  border: 1px solid rgba(60, 100, 150, 0.4);
   border-radius: 6px;
-  padding: 8px 16px;
+  padding: 0.5em 1em;
   font-size: 14px;
   font-family: inherit;
   cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: background 0.15s;
 }
 
 .ca-toggle-btn:hover {
-  background: #243650;
+  background: rgba(30, 55, 85, 0.95);
+  border-color: rgba(74, 158, 222, 0.5);
 }
 
-/* Panel */
+/* ── Panel ── */
 .ca-panel {
   position: fixed;
-  bottom: 130px;
-  right: 20px;
-  width: 380px;
-  height: 500px;
   z-index: 99998;
-  background: #0f1e2e;
-  border: 1px solid #3a5a7a;
-  border-radius: 8px;
+  background: rgba(12, 22, 36, 0.92);
+  border: 1px solid rgba(60, 100, 150, 0.35);
+  border-radius: 10px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.55), 0 0 1px rgba(60, 100, 150, 0.3);
   font-family: inherit;
   color: #e0e8f0;
+  backdrop-filter: blur(12px);
 }
 
-/* Header */
+/* ── Resize handles ── */
+.ca-resize-handle {
+  position: absolute;
+  z-index: 10;
+}
+
+.ca-resize-handle--right {
+  top: 0;
+  right: 0;
+  width: 6px;
+  height: 100%;
+  cursor: ew-resize;
+}
+
+.ca-resize-handle--bottom {
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 6px;
+  cursor: ns-resize;
+}
+
+.ca-resize-handle--corner {
+  bottom: 0;
+  right: 0;
+  width: 14px;
+  height: 14px;
+  cursor: nwse-resize;
+}
+
+.ca-resize-handle--left {
+  top: 0;
+  left: 0;
+  width: 6px;
+  height: 100%;
+  cursor: ew-resize;
+}
+
+.ca-resize-handle--top {
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 6px;
+  cursor: ns-resize;
+}
+
+/* ── Header (drag handle) ── */
 .ca-panel__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 14px;
-  background: #162436;
-  border-bottom: 1px solid #3a5a7a;
-  font-size: 14px;
+  padding: 0.7em 1em;
+  background: linear-gradient(180deg, rgba(30, 48, 72, 0.95) 0%, rgba(20, 36, 56, 0.95) 100%);
+  border-bottom: 1px solid rgba(60, 100, 150, 0.3);
+  font-size: 1em;
   font-weight: 600;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
   flex-shrink: 0;
+  cursor: move;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.ca-panel__header-title {
+  color: #c8d8e8;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
 .ca-panel__header-actions {
@@ -58,71 +119,95 @@
 }
 
 .ca-btn-icon {
-  background: none;
-  border: none;
-  color: #7a9ab5;
-  font-size: 13px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(60, 100, 150, 0.2);
+  color: #8aa4bc;
+  font-size: 0.85em;
   cursor: pointer;
-  padding: 2px 6px;
+  padding: 0.2em 0.5em;
   border-radius: 4px;
-  margin-left: 4px;
+  margin-left: 0.35em;
+  transition: background 0.15s, color 0.15s;
 }
 
 .ca-btn-icon:hover {
   color: #e0e8f0;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(74, 158, 222, 0.15);
+  border-color: rgba(74, 158, 222, 0.3);
 }
 
-/* Messages */
+/* ── Messages area ── */
 .ca-messages {
   flex: 1;
   overflow-y: auto;
-  padding: 12px;
+  padding: 0.85em;
   display: flex;
   flex-direction: column;
 }
 
+/* Webkit scrollbar styling (Coherent GT supports this) */
+.ca-messages::-webkit-scrollbar {
+  width: 6px;
+}
+
+.ca-messages::-webkit-scrollbar-track {
+  background: rgba(12, 22, 36, 0.5);
+  border-radius: 3px;
+}
+
+.ca-messages::-webkit-scrollbar-thumb {
+  background: rgba(60, 100, 150, 0.4);
+  border-radius: 3px;
+}
+
+.ca-messages::-webkit-scrollbar-thumb:hover {
+  background: rgba(74, 158, 222, 0.5);
+}
+
+/* ── Chat bubbles ── */
 .ca-bubble {
   max-width: 85%;
-  padding: 8px 12px;
+  padding: 0.55em 0.85em;
   border-radius: 10px;
-  font-size: 13px;
-  line-height: 1.5;
-  margin-bottom: 8px;
+  font-size: 0.92em;
+  line-height: 1.55;
+  margin-bottom: 0.55em;
+  word-wrap: break-word;
 }
 
 .ca-bubble--user {
   align-self: flex-end;
-  background: #1b4f8a;
+  background: rgba(30, 80, 140, 0.85);
+  border: 1px solid rgba(50, 110, 180, 0.4);
   border-bottom-right-radius: 3px;
 }
 
 .ca-bubble--assistant {
   align-self: flex-start;
-  background: #162436;
-  border: 1px solid #2a4a6a;
+  background: rgba(22, 38, 58, 0.9);
+  border: 1px solid rgba(60, 100, 150, 0.3);
   border-bottom-left-radius: 3px;
 }
 
 .ca-bubble__image-badge {
   display: block;
-  font-size: 11px;
-  color: #7ab8e0;
-  margin-bottom: 4px;
+  font-size: 0.8em;
+  color: #4a9ede;
+  margin-bottom: 0.3em;
   font-style: italic;
 }
 
-/* Loading dots */
+/* ── Loading dots ── */
 .ca-loading-dots {
   display: flex;
-  padding: 2px 0;
+  padding: 0.15em 0;
 }
 
 .ca-loading-dots span {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #7ab8e0;
+  background: #4a9ede;
   margin-right: 4px;
   animation: ca-dot-bounce 1.2s infinite ease-in-out;
 }
@@ -136,37 +221,37 @@
   40%           { transform: scale(1.0); opacity: 1.0; }
 }
 
-/* Input area */
+/* ── Input area ── */
 .ca-input-area {
   flex-shrink: 0;
-  border-top: 1px solid #2a4a6a;
-  padding: 8px 10px;
+  border-top: 1px solid rgba(60, 100, 150, 0.25);
+  padding: 0.55em 0.7em;
   display: flex;
   flex-direction: column;
-  background: #0d1a28;
+  background: rgba(10, 18, 30, 0.95);
 }
 
 .ca-screenshot-chip {
   display: flex;
   align-items: center;
-  background: #1a3a5a;
-  border: 1px solid #3a6a9a;
+  background: rgba(30, 60, 100, 0.6);
+  border: 1px solid rgba(74, 158, 222, 0.35);
   border-radius: 20px;
-  padding: 3px 10px;
-  font-size: 11px;
-  color: #7ab8e0;
+  padding: 0.2em 0.7em;
+  font-size: 0.78em;
+  color: #4a9ede;
   align-self: flex-start;
-  margin-bottom: 6px;
+  margin-bottom: 0.4em;
 }
 
 .ca-screenshot-chip button {
   background: none;
   border: none;
-  color: #7ab8e0;
+  color: #4a9ede;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 0.9em;
   padding: 0;
-  margin-left: 6px;
+  margin-left: 0.4em;
   line-height: 1;
 }
 
@@ -177,67 +262,71 @@
 .ca-input-row {
   display: flex;
   align-items: flex-end;
-  margin-top: 0;
 }
 
 .ca-input {
   flex: 1;
-  background: #162436;
-  border: 1px solid #2a4a6a;
+  background: rgba(20, 36, 56, 0.8);
+  border: 1px solid rgba(60, 100, 150, 0.3);
   border-radius: 6px;
   color: #e0e8f0;
   font-family: inherit;
-  font-size: 13px;
-  padding: 8px 10px;
-  margin-right: 6px;
+  font-size: 0.92em;
+  padding: 0.55em 0.7em;
+  margin-right: 0.4em;
   line-height: 1.4;
+  resize: none;
+  transition: border-color 0.15s;
 }
 
 .ca-input:focus {
-  border-color: #3a6a9a;
+  border-color: rgba(74, 158, 222, 0.5);
+  outline: none;
 }
 
 .ca-screenshot-btn {
-  background: #1a3a5a;
-  color: #7ab8e0;
-  border: 1px solid #2a4a6a;
+  background: rgba(25, 50, 80, 0.8);
+  color: #4a9ede;
+  border: 1px solid rgba(60, 100, 150, 0.3);
   border-radius: 6px;
-  padding: 8px 10px;
-  font-size: 12px;
+  padding: 0.55em 0.7em;
+  font-size: 0.85em;
   font-weight: 600;
   cursor: pointer;
   font-family: inherit;
   white-space: nowrap;
-  margin-right: 6px;
+  margin-right: 0.4em;
+  transition: background 0.15s, color 0.15s;
 }
 
 .ca-screenshot-btn:hover {
-  background: #243650;
+  background: rgba(40, 70, 110, 0.9);
   color: #e0e8f0;
 }
 
 .ca-screenshot-btn[disabled] {
-  opacity: 0.4;
+  opacity: 0.35;
   cursor: default;
 }
 
 .ca-send-btn {
-  background: #1b4f8a;
+  background: rgba(30, 80, 140, 0.85);
   color: #e0e8f0;
-  border: 1px solid #2a6aaa;
+  border: 1px solid rgba(50, 110, 180, 0.4);
   border-radius: 6px;
-  padding: 8px 14px;
-  font-size: 13px;
+  padding: 0.55em 1em;
+  font-size: 0.92em;
   cursor: pointer;
   font-family: inherit;
   white-space: nowrap;
+  transition: background 0.15s;
 }
 
 .ca-send-btn:hover {
-  background: #245fa0;
+  background: rgba(40, 95, 165, 0.9);
 }
 
 .ca-send-btn[disabled] {
-  opacity: 0.4;
+  opacity: 0.35;
   cursor: default;
 }
