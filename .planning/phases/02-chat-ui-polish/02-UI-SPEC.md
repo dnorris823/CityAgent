@@ -67,18 +67,32 @@ Source: existing `style.css` — `em`-based scaling from `fontSize` binding (def
 
 Source: existing `style.css` and `fontSize` binding pattern.
 
-| Role | Size | Weight | Line Height | Notes |
-|------|------|--------|-------------|-------|
-| Body / bubble text | 0.92em (≈12.9px @ 14px base) | 400 | 1.55 | `.ca-bubble` existing |
-| Label / chip / badge | 0.78em–0.85em | 400 | 1.2 | `.ca-screenshot-chip`, `.ca-btn-icon` |
-| System notice text | 0.82em | 400 | 1.3 | New: `.ca-notice-pill` — smaller than bubble, muted |
-| Loading status text | 0.82em | 400 italic | 1.3 | New: `.ca-loading-status` — below dots |
-| Code language label | 0.75em | 400 | 1.0 | New: `.ca-code-lang` — above `<pre>` block |
-| Welcome greeting | 0.95em | 400 italic | 1.5 | New: `.ca-welcome` — centered, muted |
-| Header title | 1em | 600 | 1.0 | `.ca-panel__header-title` existing |
-| Markdown headings | 1.05em / 1.15em / 1.3em | 600 | 1.3 | `.ca-markdown h3/h2/h1` existing |
+### Phase type scale (4 sizes — new declarations for this phase)
+
+| Token | Size | Weight | Line Height | Applied to |
+|-------|------|--------|-------------|------------|
+| small | 0.82em | 400 | 1.3 | Labels, chips, badges, system notice text, loading status text, code language label |
+| body | 0.92em | 400 | 1.55 | Bubble text (`.ca-bubble`) — existing; welcome greeting (italic variant) |
+| interface | 1em | 600 | 1.0 | Header title (`.ca-panel__header-title`) — existing |
+| display | 1.1em | 600 | 1.2 | Reserved for emphasis headings if needed; not emitted by any new component this phase |
 
 **Font weight rule:** Only 400 (regular) and 600 (semibold) are used. No 500, no 700, no 300.
+
+**Welcome greeting:** Uses `body` token (0.92em / 400) + `font-style: italic` to visually distinguish from message text. No separate size.
+
+**Code language label:** Uses `small` token (0.82em). Previous draft had 0.75em — consolidated up to `small`.
+
+**Chip / badge / label text (`.ca-screenshot-chip`, `.ca-btn-icon`, `.ca-queued-chip`):** Uses `small` token (0.82em). Previous draft had a 0.78em–0.85em range — consolidated to `small`.
+
+### Pre-existing renderer output — excluded from phase type scale count
+
+The following sizes are emitted by the pre-existing `renderMarkdown.ts` heading rules and are NOT new declarations for this phase. They are listed here for auditor awareness only.
+
+| Selector | Size | Source |
+|----------|------|--------|
+| `.ca-markdown h3` | 1.05em | Pre-existing `renderMarkdown.ts` — not changed this phase |
+| `.ca-markdown h2` | 1.15em | Pre-existing `renderMarkdown.ts` — not changed this phase |
+| `.ca-markdown h1` | 1.3em | Pre-existing `renderMarkdown.ts` — not changed this phase |
 
 ---
 
@@ -154,7 +168,7 @@ box-sizing: border-box
 padding: 0.2em 0.75em
 margin: 0.3em 0
 border-radius: 20px
-font-size: 0.82em
+font-size: 0.82em   /* small token */
 line-height: 1.3
 font-style: normal
 ```
@@ -174,7 +188,7 @@ Warning variant (`.ca-notice-pill--warning`):
 Inside `.ca-bubble.ca-bubble--assistant` wrapper, below `.ca-loading-dots`:
 ```
 display: block
-font-size: 0.82em
+font-size: 0.82em   /* small token */
 font-style: italic
 color: #8aa4bc
 margin-top: 0.4em
@@ -183,7 +197,7 @@ line-height: 1.3
 
 ### `.ca-queued-chip`
 
-Identical to `.ca-screenshot-chip` — copy the existing rule exactly:
+Identical to `.ca-screenshot-chip` — copy the existing rule exactly, updating `font-size` to `0.82em` (small token):
 ```
 display: flex
 align-items: center
@@ -191,7 +205,7 @@ background: rgba(30, 60, 100, 0.6)
 border: 1px solid rgba(74, 158, 222, 0.35)
 border-radius: 20px
 padding: 0.2em 0.7em
-font-size: 0.78em
+font-size: 0.82em   /* small token — replaces 0.78em from screenshot chip if that differs */
 color: #4a9ede
 align-self: flex-start
 margin-bottom: 0.4em
@@ -211,7 +225,7 @@ justify-content: center
 flex: 1
 text-align: center
 color: #8aa4bc
-font-size: 0.95em
+font-size: 0.92em   /* body token */
 font-style: italic
 line-height: 1.5
 padding: 1.5em 1em
@@ -224,7 +238,7 @@ Disappears instantly (no CSS transition) when first message is appended.
 Rendered as a `<span>` immediately before the `<pre>` element in markdown output:
 ```
 display: block
-font-size: 0.75em
+font-size: 0.82em   /* small token */
 color: #8aa4bc
 font-family: "Consolas", "Courier New", monospace
 padding: 0.15em 0.5em
