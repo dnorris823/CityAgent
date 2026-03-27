@@ -74,6 +74,24 @@
 ### ECS Research Scope
 - **D-18:** Researcher targets **vanilla CS2 ECS only** — unmodded game DLLs under `{CS2_INSTALL_PATH}/Cities2_Data/Managed/`. No mod-patched or Harmony-extended APIs. The mod must work for any CS2 player.
 
+### Phase Scope
+- **D-19:** Phase 3 is **purely C#** — no React UI changes. New tools and settings toggles are entirely on the C# side. CS2's built-in settings UI renders the Data Tools section without any panel work.
+
+### Budget: Loans & Debt
+- **D-20:** Include loan/debt data in `get_budget()` **if ECS exposes it** — loan balance and/or monthly repayment. A city in debt is important advisor context. Researcher confirms available fields; omit silently if not queryable.
+
+### Toggle Timing
+- **D-21:** Tool toggle changes take effect **immediately on the next API call**. `CityToolRegistry` reads `Mod.ActiveSetting` at serialization time on every request — no restart, no new chat required.
+
+### Data Refresh Rate
+- **D-22:** New budget/services/traffic ECS properties refresh on the **same 128-frame throttle** as existing population data. All ECS reads happen in one `CityDataSystem.OnUpdate` cycle.
+
+### Verification
+- **D-23:** The plan **includes an explicit in-game verification task**: build → deploy → load a city → ask Claude about finances, traffic, and services → confirm real ECS numbers appear in the response (not placeholder or error values).
+
+### ECS Research Starting Point
+- **D-24:** **No prior hints** on ECS system names for budget or traffic. Researcher discovers from scratch via decompiled `Game.dll` and related Managed DLLs.
+
 ### Claude's Discretion
 - Exact ECS component/system names for budget, traffic, and services — researcher discovers
 - Whether budget income/expense categories map 1:1 to ECS or require aggregation — researcher confirms
