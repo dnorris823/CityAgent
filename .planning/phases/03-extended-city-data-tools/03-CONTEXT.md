@@ -56,10 +56,29 @@
 - **D-12:** Settings section label: **"Data Tools"**. Toggle labels use the tool's human-readable
   name (e.g., "City Finances" for `get_budget`), not the raw function name.
 
+### Zoning Tool Upgrade (DATA-04)
+- **D-13:** If the researcher confirms real zone area/count ECS data is available, **upgrade `get_zoning_summary`** to use it instead of demand indices as proxies. Budget/traffic/services are the primary deliverables; zoning upgrade is in-scope if the data is there — defer only if it requires significant new ECS query work.
+
+### System Prompt Update
+- **D-14:** Phase 3 **updates the default `SystemPrompt`** in `Settings.cs` to include explicit tool-use guidance — naming `get_budget`, `get_traffic_summary`, `get_services_summary` and when to call them. The goal is reliable, unprompted tool use when players ask about finances, traffic, or services. Planner writes the updated default prompt text.
+
+### Settings Layout
+- **D-15:** "Data Tools" section is the **fourth section**, after Memory. Settings order: General → UI → Memory → Data Tools. Power-user toggle surface at the end.
+
+### ECS Unavailability Fallback
+- **D-16:** If an ECS system or component isn't available at runtime, tools return a **partial result with an `"unavailable"` flag** for the missing fields rather than an error string or empty object. Example: `{ "balance": 12000, "breakdown": "unavailable" }`. Claude can use what's present and acknowledge what's missing.
+
+### Currency & Units
+- **D-17:** `get_budget()` returns **raw integers only** — no currency label or unit field. The tool description and system prompt establish CS2 city funds context. Claude knows what the numbers mean.
+
+### ECS Research Scope
+- **D-18:** Researcher targets **vanilla CS2 ECS only** — unmodded game DLLs under `{CS2_INSTALL_PATH}/Cities2_Data/Managed/`. No mod-patched or Harmony-extended APIs. The mod must work for any CS2 player.
+
 ### Claude's Discretion
 - Exact ECS component/system names for budget, traffic, and services — researcher discovers
 - Whether budget income/expense categories map 1:1 to ECS or require aggregation — researcher confirms
 - Human-readable labels for each tool toggle in settings (`LocaleEN` entries) — engineering decision
+- Exact wording of the updated default system prompt tool-use guidance — engineering decision
 - Whether the toggle group order in settings should match tool registration order or be alphabetical — engineering decision
 
 </decisions>
