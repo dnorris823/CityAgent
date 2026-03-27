@@ -14,7 +14,7 @@
 ### API Integration
 
 - [ ] **API-01**: Claude API (`/v1/messages`) format is fully supported — correct headers (`x-api-key`, `anthropic-version`), system as top-level field, image content blocks, `tool_result` as user role with `tool_use_id`
-- [ ] **API-02**: Ollama API (`/api/chat`) format is supported alongside Claude — user can select provider in settings
+- [ ] **API-02**: Ollama API (`/v1/chat/completions`) format is supported alongside Claude — user can select provider in settings
 - [ ] **API-03**: Automatic rate-limit fallback — when Claude returns HTTP 429, system retries with configured Ollama endpoint (or surfaces clear error if no fallback configured)
 - [ ] **API-04**: User-configurable model name in mod settings — changes take effect without restarting the game
 
