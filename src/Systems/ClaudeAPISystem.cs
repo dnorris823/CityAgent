@@ -85,9 +85,9 @@ namespace CityAgent.Systems
                     return;
                 }
 
-                string baseUrl   = (setting.OllamaBaseUrl ?? "").Trim().TrimEnd('/');
-                string apiKey    = (setting.OllamaApiKey ?? "").Trim();
-                string model     = (setting.OllamaModel ?? "").Trim();
+                string baseUrl   = (setting.OllamaFallbackBaseUrl ?? "").Trim().TrimEnd('/');
+                string apiKey    = (setting.OllamaFallbackApiKey ?? "").Trim();
+                string model     = (setting.OllamaFallbackModel ?? "").Trim();
                 string sysPrompt = setting.SystemPrompt ?? "";
 
                 // Inject always-loaded narrative memory context
