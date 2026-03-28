@@ -8,12 +8,13 @@ using System.Collections.Generic;
 namespace CityAgent
 {
     [FileLocation(nameof(CityAgent))]
-    [SettingsUIGroupOrder(kGeneralGroup, kUIGroup, kMemoryGroup)]
-    [SettingsUIShowGroupName(kGeneralGroup, kUIGroup, kMemoryGroup)]
+    [SettingsUIGroupOrder(kClaudeGroup, kOllamaGroup, kUIGroup, kMemoryGroup)]
+    [SettingsUIShowGroupName(kClaudeGroup, kOllamaGroup, kUIGroup, kMemoryGroup)]
     public class Setting : ModSetting
     {
         public const string kSection = "Main";
-        public const string kGeneralGroup = "General";
+        public const string kClaudeGroup = "Claude";
+        public const string kOllamaGroup = "Ollama";
         public const string kUIGroup = "UI";
         public const string kMemoryGroup = "Memory";
 
@@ -25,25 +26,44 @@ namespace CityAgent
 
         public Setting(IMod mod) : base(mod) { }
 
-        [SettingsUISection(kSection, kGeneralGroup)]
-        [SettingsUITextInput]
-        public string OllamaApiKey { get; set; } = string.Empty;
+        // ── Claude API section ────────────────────────────────────────────────────
 
-        [SettingsUISection(kSection, kGeneralGroup)]
+        [SettingsUISection(kSection, kClaudeGroup)]
         [SettingsUITextInput]
-        public string OllamaModel { get; set; } = "kimi-k2.5:cloud";
+        public string ClaudeApiKey { get; set; } = string.Empty;
 
-        [SettingsUISection(kSection, kGeneralGroup)]
+        [SettingsUISection(kSection, kClaudeGroup)]
         [SettingsUITextInput]
-        public string OllamaBaseUrl { get; set; } = "https://ollama.com";
+        public string ClaudeModel { get; set; } = "claude-sonnet-4-6";
 
-        [SettingsUISection(kSection, kGeneralGroup)]
+        [SettingsUISection(kSection, kClaudeGroup)]
+        public string ActiveProvider => string.IsNullOrWhiteSpace(ClaudeApiKey)
+            ? "Currently using: No API key configured"
+            : "Currently using: Claude API";
+
+        [SettingsUISection(kSection, kClaudeGroup)]
         [SettingsUITextInput]
         public string SystemPrompt { get; set; } = DefaultSystemPrompt;
 
-        [SettingsUISection(kSection, kGeneralGroup)]
+        [SettingsUISection(kSection, kClaudeGroup)]
         [SettingsUITextInput]
         public string ScreenshotKeybind { get; set; } = "F8";
+
+        // ── Ollama Fallback (optional) section ───────────────────────────────────
+
+        [SettingsUISection(kSection, kOllamaGroup)]
+        [SettingsUITextInput]
+        public string OllamaFallbackBaseUrl { get; set; } = "http://localhost:11434";
+
+        [SettingsUISection(kSection, kOllamaGroup)]
+        [SettingsUITextInput]
+        public string OllamaFallbackApiKey { get; set; } = string.Empty;
+
+        [SettingsUISection(kSection, kOllamaGroup)]
+        [SettingsUITextInput]
+        public string OllamaFallbackModel { get; set; } = "llama3.1:8b";
+
+        // ── UI section ────────────────────────────────────────────────────────────
 
         [SettingsUISection(kSection, kUIGroup)]
         [SettingsUISlider(min = 400, max = 1600, step = 10)]
@@ -57,6 +77,8 @@ namespace CityAgent
         [SettingsUISlider(min = 11, max = 32, step = 1)]
         public int FontSize { get; set; } = 14;
 
+        // ── Memory section ────────────────────────────────────────────────────────
+
         [SettingsUISection(kSection, kMemoryGroup)]
         [SettingsUISlider(min = 10, max = 200, step = 5)]
         public int MaxNarrativeLogEntries { get; set; } = 50;
@@ -67,16 +89,18 @@ namespace CityAgent
 
         public override void SetDefaults()
         {
-            OllamaApiKey      = string.Empty;
-            OllamaModel       = "kimi-k2.5:cloud";
-            OllamaBaseUrl     = "https://ollama.com";
-            SystemPrompt      = DefaultSystemPrompt;
-            ScreenshotKeybind = "F8";
-            PanelWidth                = 520;
-            PanelHeight               = 650;
-            FontSize                  = 14;
-            MaxNarrativeLogEntries    = 50;
-            MaxChatHistorySessions    = 20;
+            ClaudeApiKey           = string.Empty;
+            ClaudeModel            = "claude-sonnet-4-6";
+            OllamaFallbackBaseUrl  = "http://localhost:11434";
+            OllamaFallbackApiKey   = string.Empty;
+            OllamaFallbackModel    = "llama3.1:8b";
+            SystemPrompt           = DefaultSystemPrompt;
+            ScreenshotKeybind      = "F8";
+            PanelWidth             = 520;
+            PanelHeight            = 650;
+            FontSize               = 14;
+            MaxNarrativeLogEntries = 50;
+            MaxChatHistorySessions = 20;
         }
     }
 
@@ -94,17 +118,27 @@ namespace CityAgent
             {
                 { m_Setting.GetSettingsLocaleID(), "CityAgent" },
                 { m_Setting.GetOptionTabLocaleID(Setting.kSection), "Main" },
-                { m_Setting.GetOptionGroupLocaleID(Setting.kGeneralGroup), "General" },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OllamaApiKey)),      "Ollama API Key" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.OllamaApiKey)),       "Your Ollama cloud API key. Never share this." },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OllamaModel)),       "Model" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.OllamaModel)),        "Model ID (e.g. kimi-k2.5:cloud)" },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OllamaBaseUrl)),     "API Base URL" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.OllamaBaseUrl)),      "OpenAI-compatible endpoint base URL (e.g. https://ollama.com)" },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.SystemPrompt)),      "System Prompt" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.SystemPrompt)),       "Advisor persona prompt sent to the AI at the start of every conversation." },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ScreenshotKeybind)), "Screenshot Keybind" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.ScreenshotKeybind)),  "Unity KeyCode name for capturing a screenshot (default: F8)." },
+                // Claude API group
+                { m_Setting.GetOptionGroupLocaleID(Setting.kClaudeGroup), "Claude API" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ClaudeApiKey)),        "API Key" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.ClaudeApiKey)),         "Your Anthropic API key. Never share this." },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ClaudeModel)),         "Model" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.ClaudeModel)),          "Claude model ID (default: claude-sonnet-4-6)" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ActiveProvider)),      "Status" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.ActiveProvider)),       "Shows which AI provider is currently active" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.SystemPrompt)),        "System Prompt" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.SystemPrompt)),         "Advisor persona prompt sent to the AI at the start of every conversation." },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ScreenshotKeybind)),  "Screenshot Keybind" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.ScreenshotKeybind)),   "Unity KeyCode name for capturing a screenshot (default: F8)." },
+                // Ollama Fallback (optional) group
+                { m_Setting.GetOptionGroupLocaleID(Setting.kOllamaGroup), "Ollama Fallback (optional)" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OllamaFallbackBaseUrl)),  "Base URL" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.OllamaFallbackBaseUrl)),   "Ollama server base URL (default: http://localhost:11434)" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OllamaFallbackApiKey)),   "API Key" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.OllamaFallbackApiKey)),    "Optional API key for Ollama endpoint" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OllamaFallbackModel)),    "Model" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.OllamaFallbackModel)),     "Ollama model name (e.g. llama3.1:8b)" },
+                // UI group
                 { m_Setting.GetOptionGroupLocaleID(Setting.kUIGroup), "UI Settings" },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.PanelWidth)),  "Panel Width" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.PanelWidth)),   "Default width of the CityAgent panel in pixels (400–1600). You can also drag panel edges to resize." },
@@ -112,6 +146,7 @@ namespace CityAgent
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.PanelHeight)),  "Default height of the CityAgent panel in pixels (400–1200). You can also drag panel edges to resize." },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.FontSize)),    "Font Size" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.FontSize)),     "Base font size for all panel text (11–32)." },
+                // Memory group
                 { m_Setting.GetOptionGroupLocaleID(Setting.kMemoryGroup), "Memory Settings" },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.MaxNarrativeLogEntries)),  "Max Narrative Log Entries" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.MaxNarrativeLogEntries)),   "Maximum entries in narrative-log.md before older entries are archived (10–200)." },
