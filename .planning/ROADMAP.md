@@ -104,7 +104,11 @@ Plans:
   2. Heartbeat is off by default; player enables it and sets the interval in mod settings, and the change takes effect without restarting the game
   3. When multiple city issues exist in one heartbeat cycle, they are aggregated into a single advisor message — not a flood of individual alerts
   4. When the API returns an error during a heartbeat cycle, the system backs off and retries later rather than flooding the error log
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 06-01-PLAN.md — Settings heartbeat fields + Mod.cs HeartbeatSystem scheduling
+- [ ] 06-02-PLAN.md — HeartbeatSystem implementation: timer, async dispatch, backoff, tool loop
+- [ ] 06-03-PLAN.md — CityAgentUISystem integration: dual pipeline drain + silence filter + build verification
 
 ## Progress
 
@@ -120,4 +124,4 @@ Note: Phase 4 depends only on Phase 1 (not Phase 2 or 3) and could execute in pa
 | 3. Extended City Data Tools | 0/3 | Planning complete | - |
 | 4. Web Search Tool | 0/2 | Planning complete | - |
 | 5. Memory File Explorer | 0/3 | Planning complete | - |
-| 6. Proactive Heartbeat | 0/? | Not started | - |
+| 6. Proactive Heartbeat | 0/3 | Planning complete | - |
