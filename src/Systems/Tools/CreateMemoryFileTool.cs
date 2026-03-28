@@ -17,7 +17,7 @@ namespace CityAgent.Systems.Tools
             var input = JObject.Parse(inputJson);
             string filename = input["filename"]?.Value<string>() ?? "";
             string content  = input["content"]?.Value<string>() ?? "";
-            return m_Memory.CreateFile(filename, content);
+            return m_Memory.CreateFileAsync(filename, content).GetAwaiter().GetResult();
         }
     }
 }

@@ -7,7 +7,7 @@
 
 ### Core Stability
 
-- [ ] **CORE-01**: File writes (narrative log, chat session, screenshot encode) execute off the main game thread — no UI freezes during I/O
+- [x] **CORE-01**: File writes (narrative log, chat session, screenshot encode) execute off the main game thread — no UI freezes during I/O
 - [ ] **CORE-02**: Concurrent API requests are safe — `PendingResult` uses `Interlocked.Exchange` to prevent race conditions when heartbeat adds parallel requests
 - [ ] **CORE-03**: End-to-end tested — full build → deploy → in-game cycle passes with screenshot, tool calls, narrative memory, and response rendering working together
 
@@ -89,7 +89,7 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CORE-01 | Phase 1 | Pending |
+| CORE-01 | Phase 1 | Complete |
 | CORE-02 | Phase 1 | Pending |
 | CORE-03 | Phase 1 | Pending |
 | API-01 | Phase 1 | Pending |

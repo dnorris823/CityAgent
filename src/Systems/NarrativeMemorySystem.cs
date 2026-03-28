@@ -6,6 +6,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace CityAgent.Systems
 {
@@ -343,8 +344,8 @@ last_updated: ""{now}""
             return File.ReadAllText(path);
         }
 
-        /// <summary>Overwrite a memory file with new content.</summary>
-        public string WriteFile(string filename, string content)
+        /// <summary>Overwrite a memory file with new content (async).</summary>
+        public async Task<string> WriteFileAsync(string filename, string content)
         {
             if (!m_Initialized) return "[Error]: Memory system not initialized.";
             if (!ValidateFilename(filename, out string error)) return error;
@@ -353,48 +354,64 @@ last_updated: ""{now}""
             if (!File.Exists(path))
                 return $"[Error]: File '{filename}' does not exist. Use create_memory_file to create new files.";
 
-            File.WriteAllText(path, content);
-            Mod.Log.Info($"[NarrativeMemorySystem] Wrote {content.Length} chars to {filename}");
-            return $"Successfully wrote {content.Length} characters to {filename}.";
+            try
+            {
+                await File.WriteAllTextAsync(path, content).ConfigureAwait(false);
+                Mod.Log.Info($"[NarrativeMemorySystem] Wrote {content.Length} chars to {filename}");
+                return $"Successfully wrote {content.Length} characters to {filename}.";
+            }
+            catch (Exception ex)
+            {
+                Mod.Log.Error($"[NarrativeMemorySystem] WriteFileAsync failed for {filename}: {ex.Message}");
+                return $"[Error]: Failed to write {filename}: {ex.Message}";
+            }
         }
 
-        /// <summary>Append an entry to narrative-log.md with a timestamp.</summary>
-        public string AppendToLog(string entry)
+        /// <summary>Append an entry to narrative-log.md with a timestamp (async).</summary>
+        public async Task<string> AppendToLogAsync(string entry)
         {
             if (!m_Initialized) return "[Error]: Memory system not initialized.";
 
-            string path = Path.Combine(m_CityDir, "narrative-log.md");
-            if (!File.Exists(path))
-                return "[Error]: narrative-log.md does not exist.";
+            try
+            {
+                string path = Path.Combine(m_CityDir, "narrative-log.md");
+                if (!File.Exists(path))
+                    return "[Error]: narrative-log.md does not exist.";
 
-            string existing = File.ReadAllText(path);
-            string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm UTC", CultureInfo.InvariantCulture);
+                string existing = await File.ReadAllTextAsync(path).ConfigureAwait(false);
+                string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm UTC", CultureInfo.InvariantCulture);
 
-            // Parse entry count from frontmatter
-            int entryCount = ParseEntryCount(existing) + 1;
+                // Parse entry count from frontmatter
+                int entryCount = ParseEntryCount(existing) + 1;
 
-            // Build new entry block
-            string newEntry = $"\n---\n\n### [{timestamp}] Session #{m_SessionNumber}\n\n{entry.Trim()}\n";
+                // Build new entry block
+                string newEntry = $"\n---\n\n### [{timestamp}] Session #{m_SessionNumber}\n\n{entry.Trim()}\n";
 
-            // Insert after the frontmatter+header, before existing entries
-            int insertIndex = FindLogInsertionPoint(existing);
-            string updated = existing.Substring(0, insertIndex) + newEntry + existing.Substring(insertIndex);
+                // Insert after the frontmatter+header, before existing entries
+                int insertIndex = FindLogInsertionPoint(existing);
+                string updated = existing.Substring(0, insertIndex) + newEntry + existing.Substring(insertIndex);
 
-            // Update frontmatter entry count and last_updated
-            updated = UpdateFrontmatter(updated, entryCount);
+                // Update frontmatter entry count and last_updated
+                updated = UpdateFrontmatter(updated, entryCount);
 
-            File.WriteAllText(path, updated);
-            Mod.Log.Info($"[NarrativeMemorySystem] Appended log entry #{entryCount}");
+                await File.WriteAllTextAsync(path, updated).ConfigureAwait(false);
+                Mod.Log.Info($"[NarrativeMemorySystem] Appended log entry #{entryCount}");
 
-            // Check if archive rotation is needed
-            if (entryCount > m_MaxNarrativeLogEntries)
-                RotateNarrativeLog(path);
+                // Check if archive rotation is needed
+                if (entryCount > m_MaxNarrativeLogEntries)
+                    await RotateNarrativeLogAsync(path).ConfigureAwait(false);
 
-            return $"Appended entry to narrative-log.md (entry #{entryCount}).";
+                return $"Appended entry to narrative-log.md (entry #{entryCount}).";
+            }
+            catch (Exception ex)
+            {
+                Mod.Log.Error($"[NarrativeMemorySystem] AppendToLogAsync failed: {ex.Message}");
+                return $"[Error]: Failed to append to narrative log: {ex.Message}";
+            }
         }
 
-        /// <summary>Create a new memory file. Fails if it already exists.</summary>
-        public string CreateFile(string filename, string content)
+        /// <summary>Create a new memory file. Fails if it already exists (async).</summary>
+        public async Task<string> CreateFileAsync(string filename, string content)
         {
             if (!m_Initialized) return "[Error]: Memory system not initialized.";
             if (!ValidateFilename(filename, out string error)) return error;
@@ -407,13 +424,21 @@ last_updated: ""{now}""
             if (File.Exists(path))
                 return $"[Error]: File '{filename}' already exists. Use write_memory_file to update it.";
 
-            File.WriteAllText(path, content);
-            Mod.Log.Info($"[NarrativeMemorySystem] Created new file: {filename}");
-            return $"Successfully created {filename}.";
+            try
+            {
+                await File.WriteAllTextAsync(path, content).ConfigureAwait(false);
+                Mod.Log.Info($"[NarrativeMemorySystem] Created new file: {filename}");
+                return $"Successfully created {filename}.";
+            }
+            catch (Exception ex)
+            {
+                Mod.Log.Error($"[NarrativeMemorySystem] CreateFileAsync failed for {filename}: {ex.Message}");
+                return $"[Error]: Failed to create {filename}: {ex.Message}";
+            }
         }
 
-        /// <summary>Delete a dynamically-created memory file. Core files cannot be deleted.</summary>
-        public string DeleteFile(string filename)
+        /// <summary>Delete a dynamically-created memory file. Core files cannot be deleted (async).</summary>
+        public async Task<string> DeleteFileAsync(string filename)
         {
             if (!m_Initialized) return "[Error]: Memory system not initialized.";
             if (!ValidateFilename(filename, out string error)) return error;
@@ -425,9 +450,17 @@ last_updated: ""{now}""
             if (!File.Exists(path))
                 return $"[Error]: File '{filename}' does not exist.";
 
-            File.Delete(path);
-            Mod.Log.Info($"[NarrativeMemorySystem] Deleted file: {filename}");
-            return $"Successfully deleted {filename}.";
+            try
+            {
+                await Task.Run(() => File.Delete(path)).ConfigureAwait(false);
+                Mod.Log.Info($"[NarrativeMemorySystem] Deleted file: {filename}");
+                return $"Successfully deleted {filename}.";
+            }
+            catch (Exception ex)
+            {
+                Mod.Log.Error($"[NarrativeMemorySystem] DeleteFileAsync failed for {filename}: {ex.Message}");
+                return $"[Error]: Failed to delete {filename}: {ex.Message}";
+            }
         }
 
         /// <summary>List all memory files with metadata.</summary>
@@ -502,21 +535,24 @@ last_updated: ""{now}""
 
         // ── Chat History Persistence ────────────────────────────────────────────────
 
-        /// <summary>Save a chat session transcript to chat-history/session-NNN.md.</summary>
-        public void SaveChatSession(string transcriptMarkdown)
+        /// <summary>Save a chat session transcript to chat-history/session-NNN.md (async).</summary>
+        public async Task SaveChatSessionAsync(string transcriptMarkdown)
         {
             if (!m_Initialized) return;
-
-            string histDir = Path.Combine(m_CityDir, "chat-history");
-            Directory.CreateDirectory(histDir);
-
-            string filename = $"session-{m_SessionNumber:D3}.md";
-            string path = Path.Combine(histDir, filename);
-            File.WriteAllText(path, transcriptMarkdown);
-            Mod.Log.Info($"[NarrativeMemorySystem] Saved chat session: {filename}");
-
-            // Prune old sessions
-            PruneChatHistory(histDir);
+            try
+            {
+                string histDir = Path.Combine(m_CityDir, "chat-history");
+                Directory.CreateDirectory(histDir);
+                string filename = $"session-{m_SessionNumber:D3}.md";
+                string path = Path.Combine(histDir, filename);
+                await File.WriteAllTextAsync(path, transcriptMarkdown).ConfigureAwait(false);
+                Mod.Log.Info($"[NarrativeMemorySystem] Saved chat session: {filename}");
+                await PruneChatHistoryAsync(histDir).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                Mod.Log.Error($"[NarrativeMemorySystem] SaveChatSessionAsync failed: {ex.Message}");
+            }
         }
 
         /// <summary>Load the most recent chat session transcript, if any.</summary>
@@ -676,11 +712,11 @@ last_updated: ""{now}""
             return content;
         }
 
-        private void RotateNarrativeLog(string logPath)
+        private async Task RotateNarrativeLogAsync(string logPath)
         {
             try
             {
-                string content = File.ReadAllText(logPath);
+                string content = await File.ReadAllTextAsync(logPath).ConfigureAwait(false);
 
                 // Split entries by the --- separator
                 var entries = Regex.Split(content, @"\n---\n").ToList();
@@ -705,22 +741,22 @@ last_updated: ""{now}""
                 // Write archived entries
                 string archiveContent = $"# Narrative Log Archive #{archiveNum}\n\n" +
                     string.Join("\n---\n", archive);
-                File.WriteAllText(archivePath, archiveContent);
+                await File.WriteAllTextAsync(archivePath, archiveContent).ConfigureAwait(false);
 
                 // Rewrite the main log with only kept entries
                 string newContent = header + string.Join("\n---\n", keep.Select(e => "\n---\n" + e));
                 newContent = Regex.Replace(newContent, @"entry_count:\s*\d+", $"entry_count: {keep.Count}");
-                File.WriteAllText(logPath, newContent);
+                await File.WriteAllTextAsync(logPath, newContent).ConfigureAwait(false);
 
                 Mod.Log.Info($"[NarrativeMemorySystem] Archived {archive.Count} log entries to narrative-log-{archiveNum:D3}.md");
             }
             catch (Exception ex)
             {
-                Mod.Log.Error($"[NarrativeMemorySystem] Archive rotation failed: {ex.Message}");
+                Mod.Log.Error($"[NarrativeMemorySystem] RotateNarrativeLogAsync failed: {ex.Message}");
             }
         }
 
-        private void PruneChatHistory(string histDir)
+        private async Task PruneChatHistoryAsync(string histDir)
         {
             try
             {
@@ -733,13 +769,13 @@ last_updated: ""{now}""
                 // Delete oldest sessions beyond the limit
                 for (int i = m_MaxChatHistorySessions; i < files.Length; i++)
                 {
-                    File.Delete(files[i]);
+                    await Task.Run(() => File.Delete(files[i])).ConfigureAwait(false);
                     Mod.Log.Info($"[NarrativeMemorySystem] Pruned old chat session: {Path.GetFileName(files[i])}");
                 }
             }
             catch (Exception ex)
             {
-                Mod.Log.Error($"[NarrativeMemorySystem] Chat history pruning failed: {ex.Message}");
+                Mod.Log.Error($"[NarrativeMemorySystem] PruneChatHistoryAsync failed: {ex.Message}");
             }
         }
     }

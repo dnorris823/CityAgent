@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 01-api-migration-core-stability/01-01-PLAN.md
+stopped_at: Completed 01-api-migration-core-stability/01-02-PLAN.md
 last_updated: "2026-03-28T22:45:16.564Z"
-last_activity: 2026-03-28 — Plan 01-01 complete
+last_activity: 2026-03-28 — Plan 01-02 complete
 progress:
   total_phases: 6
   completed_phases: 0
   total_plans: 18
-  completed_plans: 1
+  completed_plans: 2
   percent: 0
 ---
 
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-03-26)
 ## Current Position
 
 Phase: 01 (API Migration & Core Stability) — EXECUTING
-Plan: 1 of 4
+Plan: 2 of 4
 Status: In progress
-Last activity: 2026-03-28 — Plan 01-01 complete
+Last activity: 2026-03-28 — Plan 01-02 complete
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -53,6 +53,7 @@ Progress: [░░░░░░░░░░] 0%
 
 *Updated after each plan completion*
 | Phase 01-api-migration-core-stability P01 | 4 | 1 tasks | 2 files |
+| Phase 01-api-migration-core-stability P02 | 3min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -65,6 +66,9 @@ Recent decisions affecting current work:
 - No streaming API: Coherent GT binding layer not designed for incremental updates — use `stream: false` with loading indicator
 - Brave Search over Bing: Free tier (2,000/month), single header auth, fits existing async HTTP pattern
 - [Phase 01-api-migration-core-stability]: Old OllamaApiKey/OllamaModel/OllamaBaseUrl fields deleted entirely per D-01; new ClaudeApiKey/ClaudeModel primary + OllamaFallback* optional section with claude-sonnet-4-6 default (D-02) and localhost:11434 Ollama default (D-03)
+- [Phase 01-api-migration-core-stability]: GetAwaiter().GetResult() used in tool Execute methods — safe on thread pool (no SynchronizationContext in Unity Mono)
+- [Phase 01-api-migration-core-stability]: File.Delete wrapped in Task.Run since .NET Standard 2.1 has no DeleteAsync
+- [Phase 01-api-migration-core-stability]: NarrativeMemorySystem read methods (ReadFile, ListFiles, GetAlwaysInjectedContext) kept synchronous
 
 ### Pending Todos
 
@@ -80,5 +84,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-28T22:45:16.561Z
-Stopped at: Completed 01-api-migration-core-stability/01-01-PLAN.md
+Stopped at: Completed 01-api-migration-core-stability/01-02-PLAN.md
 Resume file: None
