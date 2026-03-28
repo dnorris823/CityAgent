@@ -5,6 +5,7 @@ status: draft
 shadcn_initialized: false
 preset: none
 created: 2026-03-28
+revised: 2026-03-28
 ---
 
 # Phase 5 — UI Design Contract: Memory File Explorer
@@ -40,15 +41,26 @@ base of 16px. Pixels shown are the reference values at default 14px font size.
 |-------|----------|--------------|-------|
 | xs | 0.25em | ~4px | Icon inline padding, tight row gaps (flexbox margin) |
 | sm | 0.5em | ~8px | Compact element spacing, button padding vertical |
-| md | 0.7em | ~10px | Default cell padding (matches existing `.ca-input-area` padding) |
-| lg | 0.85em | ~12px | Content area padding (matches `.ca-messages` padding) |
+| md | 0.7em | ~10px | Default cell padding — continuity token (see exception note) |
+| lg | 0.85em | ~12px | Content area padding — continuity token (see exception note) |
 | xl | 1em | ~14px | Section internal spacing |
 | tab-height | 2.2em | ~31px | Tab bar minimum height (touch/click target) |
 | sub-header-height | 2.4em | ~34px | Sub-header bar minimum height |
 
-**Exceptions:** File list rows use 44px minimum touch-target height expressed as
-`min-height: 2.8em` at 16px reference. This ensures legibility and click accuracy inside
-the game panel at all font sizes.
+**Declared exceptions — continuity tokens (not arbitrary values):**
+`md = 0.7em` and `lg = 0.85em` do not resolve to exact 4px multiples at the 14px base.
+They are declared exceptions because they reproduce values already present in the existing
+`UI/src/style.css`:
+- `0.7em` appears in `.ca-panel__header { padding: 0.7em 1em }` and
+  `.ca-input-area { padding: 0.55em 0.7em }` (line 99, line 235)
+- `0.85em` appears in `.ca-messages { padding: 0.85em }` and
+  `.ca-bubble { padding: 0.55em 0.85em }` (line 144, line 173)
+
+Using these exact values ensures Phase 5 components visually align with the existing panel
+at every font size. Deviation would create mismatched density.
+
+**File list rows exception:** Rows use `min-height: 2.8em` (~39px at 14px base) to ensure a
+legible click target at all font sizes. This is a minimum-height guard, not a spacing token.
 
 **Coherent GT note:** All spacing uses `margin-*` properties on flex children — never `gap`.
 
@@ -57,6 +69,10 @@ the game panel at all font sizes.
 ## Typography
 
 All type is `em`-relative to the panel's `fontSize` binding (default 14px, user-configurable).
+
+**Primary focal point:** Active tab indicator (2px accent bottom border) + sub-header filename
+(semibold, full-width, text-overflow ellipsis) — these are the primary visual anchors in the
+Memory tab.
 
 | Role | Size | Weight | Line Height | Usage |
 |------|------|--------|-------------|-------|
@@ -97,7 +113,7 @@ All colors in `rgba()` — no hex shorthand. Inherits the existing panel dark tr
 - Delete button idle: same as `.ca-btn-icon` (no destructive tint until confirmation)
 - Delete confirmation sub-header: `background: rgba(140, 20, 20, 0.35)`, border `rgba(180, 40, 40, 0.4)`
 - Delete error inline notice: `color: rgba(255, 100, 100, 0.9)`, background `rgba(140, 20, 20, 0.3)`
-- Save error notice above textarea: same destructive palette
+- Save Changes error notice above textarea: same destructive palette
 
 **Lock / core badge:** `color: rgba(160, 180, 200, 0.55)` — visually subdued, not accent.
 
@@ -194,7 +210,7 @@ drag applies to the header container but NOT to the tab buttons — tab buttons 
                                  flex-shrink 0
 ```
 
-#### Buttons (reuse existing `.ca-btn-icon` for Edit / Save / Cancel / Yes / Delete)
+#### Buttons (reuse existing `.ca-btn-icon` for Edit / Save Changes / Discard Changes / Yes / Delete)
 
 No new button classes needed for Phase 5. All action buttons use `.ca-btn-icon`.
 Delete confirmation "Yes" button adds modifier:
@@ -234,8 +250,8 @@ Delete confirmation "Yes" button adds modifier:
     span.ca-mem-subheader__filename  "filename.md"
     .ca-mem-subheader__actions
       (read):  [Edit] [Delete] or [Edit] only (core file)
-      (edit):  [Save] [Cancel]
-      (delete-confirm): "Delete filename.md?" [Yes] [Cancel]
+      (edit):  [Save Changes] [Discard Changes]
+      (delete-confirm): "Delete filename.md?" [Yes] [Discard Changes]
   .ca-mem-error   (conditional — save/delete error only)
   .ca-mem-content   (read mode)
   .ca-mem-textarea  (edit mode — replaces .ca-mem-content)
@@ -270,16 +286,16 @@ Delete confirmation "Yes" button adds modifier:
 |------|-------------------|------------|
 | File view — non-core | `← filename.md  [Edit] [Delete]` | `rgba(14,26,42,0.9)` |
 | File view — core | `← filename.md  [Edit]` + `[core]` label | `rgba(14,26,42,0.9)` |
-| Edit mode | `← filename.md  [Save] [Cancel]` | `rgba(14,26,42,0.9)` |
-| Delete confirm | `Delete filename.md?  [Yes] [Cancel]` | `rgba(140,20,20,0.35)` |
+| Edit mode | `← filename.md  [Save Changes] [Discard Changes]` | `rgba(14,26,42,0.9)` |
+| Delete confirm | `Delete filename.md?  [Yes] [Discard Changes]` | `rgba(140,20,20,0.35)` |
 
 ### Buttons
 
 | Button | Idle | Hover | Disabled |
 |--------|------|-------|----------|
 | Edit | `.ca-btn-icon` default | Accent hover (existing) | n/a |
-| Save | `.ca-btn-icon` default | Accent hover | n/a |
-| Cancel | `.ca-btn-icon` default | Existing hover | n/a |
+| Save Changes | `.ca-btn-icon` default | Accent hover | n/a |
+| Discard Changes | `.ca-btn-icon` default | Existing hover | n/a |
 | Delete | `.ca-btn-icon` default | Existing hover | n/a (hidden for core files) |
 | Yes (delete confirm) | `.ca-btn-icon--destructive` | Destructive hover | n/a |
 
@@ -293,7 +309,7 @@ No animated dots needed — this is a local file read (sub-100ms).
 
 ### Error Display
 
-**Save error:** `.ca-mem-error` banner appears between sub-header and textarea.
+**Save Changes error:** `.ca-mem-error` banner appears between sub-header and textarea.
 Copy: "Save failed — [error message from memoryOpResult]". Edit mode persists.
 
 **Delete error:** `.ca-mem-subheader__error` inline text appended in sub-header.
@@ -335,8 +351,8 @@ Placed as the first child inside `.ca-mem-list__icon` position (leftmost in row,
 | Memory tab label | `Memory` |
 | Back button | `←` (plain text arrow, no emoji) |
 | Edit button | `Edit` |
-| Save button | `Save` |
-| Cancel button | `Cancel` |
+| Save button | `Save Changes` |
+| Cancel / discard button | `Discard Changes` |
 | Delete button | `Delete` |
 | Delete confirmation prompt | `Delete {filename}?` (inline in sub-header, no trailing text) |
 | Delete confirm yes | `Yes` |
@@ -467,12 +483,22 @@ All Phase 5 CSS additions must comply with these constraints (pre-populated from
 | CONTEXT.md (D-01 through D-22) | 22 — all locked decisions incorporated |
 | RESEARCH.md | Confirmed binding contract, stack decisions, Coherent GT constraints |
 | REQUIREMENTS.md | MEM-01 through MEM-04 success criteria |
-| `UI/src/style.css` | All existing color tokens, spacing em values, class patterns |
+| `UI/src/style.css` | All existing color tokens, spacing em values, class patterns; cross-reference for md/lg spacing exception justification |
 | `UI/src/components/CityAgentPanel.tsx` | Header DOM structure, button classes, drag pattern |
 | CLAUDE.md conventions | `ca-` BEM prefix, `rgba()` colors, em spacing, var declarations |
 | User input (this session) | 0 — all fields answered by upstream artifacts or project defaults |
 
 ---
 
+## Revision History
+
+| Date | Revision | Reason |
+|------|----------|--------|
+| 2026-03-28 | Initial draft | Created by gsd-ui-researcher |
+| 2026-03-28 | Rev 1 — checker fixes | BLOCK: `Save`/`Cancel` renamed to `Save Changes`/`Discard Changes` throughout; BLOCK: md/lg spacing exception justified with `style.css` cross-references (lines 99, 144, 173, 235); FLAG: focal point declaration added to Typography section |
+
+---
+
 *Phase: 05-memory-file-explorer*
 *UI-SPEC generated: 2026-03-28*
+*UI-SPEC revised: 2026-03-28*
