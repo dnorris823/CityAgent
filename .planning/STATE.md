@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 01-api-migration-core-stability/01-02-PLAN.md
-last_updated: "2026-03-28T22:45:16.564Z"
-last_activity: 2026-03-28 — Plan 01-02 complete
+stopped_at: Completed 01-api-migration-core-stability/01-03-PLAN.md
+last_updated: "2026-03-28T22:52:47.785Z"
+last_activity: 2026-03-28 — Plan 01-03 complete
 progress:
   total_phases: 6
   completed_phases: 0
   total_plans: 18
-  completed_plans: 2
+  completed_plans: 3
   percent: 0
 ---
 
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-03-26)
 ## Current Position
 
 Phase: 01 (API Migration & Core Stability) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 Status: In progress
-Last activity: 2026-03-28 — Plan 01-02 complete
+Last activity: 2026-03-28 — Plan 01-03 complete
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -54,6 +54,7 @@ Progress: [░░░░░░░░░░] 0%
 *Updated after each plan completion*
 | Phase 01-api-migration-core-stability P01 | 4 | 1 tasks | 2 files |
 | Phase 01-api-migration-core-stability P02 | 3min | 2 tasks | 5 files |
+| Phase 01 P03 | 3 | 1 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -69,6 +70,9 @@ Recent decisions affecting current work:
 - [Phase 01-api-migration-core-stability]: GetAwaiter().GetResult() used in tool Execute methods — safe on thread pool (no SynchronizationContext in Unity Mono)
 - [Phase 01-api-migration-core-stability]: File.Delete wrapped in Task.Run since .NET Standard 2.1 has no DeleteAsync
 - [Phase 01-api-migration-core-stability]: NarrativeMemorySystem read methods (ReadFile, ListFiles, GetAlwaysInjectedContext) kept synchronous
+- [Phase 01]: Anthropic format uses x-api-key header and top-level system field (not Authorization:Bearer, not in messages array)
+- [Phase 01]: HTTP 429 sentinel __429__ for rate-limit fallback routing; 400/401/500 show [Error]: without Ollama fallback
+- [Phase 01]: Interlocked.Exchange replaces volatile on PendingResult for stronger thread-safety memory barrier
 
 ### Pending Todos
 
@@ -83,6 +87,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-28T22:45:16.561Z
-Stopped at: Completed 01-api-migration-core-stability/01-02-PLAN.md
+Last session: 2026-03-28T22:52:47.782Z
+Stopped at: Completed 01-03-PLAN.md
 Resume file: None
