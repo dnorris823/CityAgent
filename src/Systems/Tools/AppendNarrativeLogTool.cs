@@ -16,7 +16,7 @@ namespace CityAgent.Systems.Tools
         {
             var input = JObject.Parse(inputJson);
             string entry = input["entry"]?.Value<string>() ?? "";
-            return m_Memory.AppendToLog(entry);
+            return m_Memory.AppendToLogAsync(entry).GetAwaiter().GetResult();
         }
     }
 }

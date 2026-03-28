@@ -16,7 +16,7 @@ namespace CityAgent.Systems.Tools
         {
             var input = JObject.Parse(inputJson);
             string filename = input["filename"]?.Value<string>() ?? "";
-            return m_Memory.DeleteFile(filename);
+            return m_Memory.DeleteFileAsync(filename).GetAwaiter().GetResult();
         }
     }
 }
