@@ -19,7 +19,7 @@ namespace CityAgent.Systems
         private NarrativeMemorySystem  m_NarrativeMemory     = null!;
         private CityToolRegistry       m_ToolRegistry        = null!;
 
-        public volatile string? PendingResult = null;
+        public string? PendingResult = null;  // Accessed atomically via Interlocked.Exchange in CityAgentUISystem
         private bool m_RequestInFlight = false;
 
         protected override void OnCreate()

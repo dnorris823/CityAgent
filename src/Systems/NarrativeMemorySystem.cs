@@ -6,6 +6,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace CityAgent.Systems
 {
@@ -517,6 +518,25 @@ last_updated: ""{now}""
 
             // Prune old sessions
             PruneChatHistory(histDir);
+        }
+
+        /// <summary>
+        /// Fire-and-forget async wrapper for SaveChatSession.
+        /// Moves file I/O off the main game thread (CORE-01, D-11, D-12).
+        /// </summary>
+        public Task SaveChatSessionAsync(string transcriptMarkdown)
+        {
+            return Task.Run(() =>
+            {
+                try
+                {
+                    SaveChatSession(transcriptMarkdown);
+                }
+                catch (Exception ex)
+                {
+                    Mod.Log.Error($"[NarrativeMemorySystem] SaveChatSessionAsync failed: {ex.Message}");
+                }
+            });
         }
 
         /// <summary>Load the most recent chat session transcript, if any.</summary>
