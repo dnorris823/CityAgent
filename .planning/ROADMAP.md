@@ -89,8 +89,11 @@ Plans:
   2. Player clicks a file and its full contents appear in the panel without leaving the game
   3. Player edits a file's contents in the panel and saves — the change persists to disk and is reflected in Claude's next response
   4. Player attempts to delete a protected core file and is prevented — a clear message explains it is read-only
-**Plans**: TBD
-**UI hint**: yes
+**Plans:** 3 plans
+Plans:
+- [ ] 05-01-PLAN.md — C# backend: ListFiles() field extension + memory explorer bindings and triggers
+- [ ] 05-02-PLAN.md — React UI: tab navigation, file list, file viewer, edit mode, delete confirmation, CSS
+- [ ] 05-03-PLAN.md — Full build + in-game verification checkpoint
 
 ### Phase 6: Proactive Heartbeat
 **Goal**: The advisor surfaces noteworthy city events in the background — without the player having to ask
@@ -116,5 +119,5 @@ Note: Phase 4 depends only on Phase 1 (not Phase 2 or 3) and could execute in pa
 | 2. Chat UI Polish | 0/3 | Planning complete | - |
 | 3. Extended City Data Tools | 0/3 | Planning complete | - |
 | 4. Web Search Tool | 0/2 | Planning complete | - |
-| 5. Memory File Explorer | 0/? | Not started | - |
+| 5. Memory File Explorer | 0/3 | Planning complete | - |
 | 6. Proactive Heartbeat | 0/? | Not started | - |
