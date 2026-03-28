@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace CityAgent.Systems
@@ -128,27 +130,32 @@ namespace CityAgent.Systems
                 }
                 else if (File.Exists(m_ScreenshotPath))
                 {
-                    try
+                    m_ScreenshotWaitFrames = -1;  // Stop polling immediately
+                    string path = m_ScreenshotPath;
+                    _ = Task.Run(() =>
                     {
-                        byte[] png = File.ReadAllBytes(m_ScreenshotPath);
-                        File.Delete(m_ScreenshotPath);
-                        m_PendingBase64Image = Convert.ToBase64String(png);
-                        m_HasScreenshot.Update(true);
-                        Mod.Log.Info($"Screenshot loaded: {png.Length} bytes.");
-                    }
-                    catch (Exception ex)
-                    {
-                        Mod.Log.Error($"Screenshot read failed: {ex.Message}");
-                    }
-                    m_ScreenshotWaitFrames = -1;
+                        try
+                        {
+                            byte[] png = File.ReadAllBytes(path);
+                            File.Delete(path);
+                            string base64 = Convert.ToBase64String(png);
+                            // Marshal back to main thread state
+                            m_PendingBase64Image = base64;
+                            m_HasScreenshot.Update(true);
+                            Mod.Log.Info($"Screenshot loaded: {png.Length} bytes.");
+                        }
+                        catch (Exception ex)
+                        {
+                            Mod.Log.Error($"Screenshot read failed: {ex.Message}");
+                        }
+                    });
                 }
             }
 
-            // 3. Drain pending API result
-            string? result = m_ClaudeAPI.PendingResult;
+            // 3. Drain pending API result (atomically via Interlocked.Exchange — D-14, CORE-02)
+            string? result = Interlocked.Exchange(ref m_ClaudeAPI.PendingResult, null);
             if (result != null)
             {
-                m_ClaudeAPI.PendingResult = null;
                 m_History.Add(new ChatMessage { role = "assistant", content = result });
                 PushMessagesBinding();
                 m_IsLoading.Update(false);
@@ -246,10 +253,12 @@ namespace CityAgent.Systems
 
             try
             {
-                var messages = m_History.Select(m => (m.role, m.content, m.hadImage));
+                // Build markdown on the main thread (pure function, no I/O)
+                var messages = m_History.Select(m => (m.role, m.content, m.hadImage)).ToList();
                 string markdown = NarrativeMemorySystem.ChatHistoryToMarkdown(
                     messages, m_NarrativeMemory.SessionNumber, m_NarrativeMemory.CityName);
-                m_NarrativeMemory.SaveChatSession(markdown);
+                // Fire-and-forget: move file write off the main thread (D-11, D-12, CORE-01)
+                _ = m_NarrativeMemory.SaveChatSessionAsync(markdown);
             }
             catch (Exception ex)
             {

@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 01-api-migration-core-stability/01-03-PLAN.md
-last_updated: "2026-03-28T22:52:47.785Z"
-last_activity: 2026-03-28 — Plan 01-03 complete
+stopped_at: Completed 01-04 Task 1 — awaiting Task 2 human-verify checkpoint (in-game validation)
+last_updated: "2026-03-28T23:00:19.393Z"
+last_activity: 2026-03-28 — Plan 01-04 Task 1 complete, human-verify checkpoint reached
 progress:
   total_phases: 6
   completed_phases: 0
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-03-26)
 ## Current Position
 
 Phase: 01 (API Migration & Core Stability) — EXECUTING
-Plan: 3 of 4
-Status: In progress
-Last activity: 2026-03-28 — Plan 01-03 complete
+Plan: 4 of 4 (awaiting human-verify checkpoint)
+Status: Checkpoint — human in-game validation needed
+Last activity: 2026-03-28 — Plan 01-04 Task 1 complete
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -55,6 +55,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 01-api-migration-core-stability P01 | 4 | 1 tasks | 2 files |
 | Phase 01-api-migration-core-stability P02 | 3min | 2 tasks | 5 files |
 | Phase 01 P03 | 3 | 1 tasks | 2 files |
+| Phase 01 P04 | 8 | 1 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -73,6 +74,7 @@ Recent decisions affecting current work:
 - [Phase 01]: Anthropic format uses x-api-key header and top-level system field (not Authorization:Bearer, not in messages array)
 - [Phase 01]: HTTP 429 sentinel __429__ for rate-limit fallback routing; 400/401/500 show [Error]: without Ollama fallback
 - [Phase 01]: Interlocked.Exchange replaces volatile on PendingResult for stronger thread-safety memory barrier
+- [Phase 01]: volatile removed from ClaudeAPISystem.PendingResult — Interlocked.Exchange provides stronger guarantees and CS0420 prevents passing volatile ref
 
 ### Pending Todos
 
@@ -80,13 +82,11 @@ None yet.
 
 ### Blockers/Concerns
 
-- [Pre-Phase 1]: `ClaudeAPISystem` currently sends Ollama `/api/chat` format — all tool calls, screenshots, and the tool loop are broken until migration is complete
-- [Pre-Phase 1]: `CityToolRegistry.GetToolsJson()` is dead code (called nowhere) — must audit against Anthropic spec before enabling
 - [Pre-Phase 1]: ECS component names for budget/traffic are unconfirmed — runtime discovery needed before Phase 3 can begin
 - [Pre-Phase 1]: `NarrativeMemorySystem` public API surface is partially inferred — needs direct code read before Phase 5 begins
 
 ## Session Continuity
 
-Last session: 2026-03-28T22:52:47.782Z
-Stopped at: Completed 01-03-PLAN.md
+Last session: 2026-03-28T23:00:19.390Z
+Stopped at: Completed 01-04 Task 1 — awaiting Task 2 human-verify checkpoint (in-game validation)
 Resume file: None

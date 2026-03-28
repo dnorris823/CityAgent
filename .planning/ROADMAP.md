@@ -31,12 +31,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Claude invokes at least one agent tool (e.g., population) and the tool result is included in its final response
   4. Player can switch between Claude API and Ollama endpoint in mod settings without restarting the game
   5. File writes (memory log, chat session) complete on a background thread — no visible game stutter during save
-**Plans:** 3/4 plans executed
+**Plans:** 4/4 plans executed
 Plans:
 - [x] 01-01-PLAN.md — Settings refactor: Claude API primary + Ollama Fallback sections
 - [x] 01-02-PLAN.md — NarrativeMemorySystem async refactor + tool class updates
 - [x] 01-03-PLAN.md — ClaudeAPISystem rewrite: Anthropic format + Ollama fallback + thread safety
-- [ ] 01-04-PLAN.md — CityAgentUISystem wiring: Interlocked drain, async persistence, background screenshot
+- [x] 01-04-PLAN.md — CityAgentUISystem wiring: Interlocked drain, async persistence, background screenshot
 
 ### Phase 2: Chat UI Polish
 **Goal**: The chat panel looks and behaves like a polished in-game advisor interface
