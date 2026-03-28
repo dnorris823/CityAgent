@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 5 UI-SPEC approved
-last_updated: "2026-03-28T22:39:56.130Z"
-last_activity: 2026-03-28 -- Phase 01 execution started
+stopped_at: Completed 01-api-migration-core-stability/01-01-PLAN.md
+last_updated: "2026-03-28T22:45:16.564Z"
+last_activity: 2026-03-28 — Plan 01-01 complete
 progress:
   total_phases: 6
   completed_phases: 0
   total_plans: 18
-  completed_plans: 0
+  completed_plans: 1
   percent: 0
 ---
 
@@ -27,8 +27,8 @@ See: .planning/PROJECT.md (updated 2026-03-26)
 
 Phase: 01 (API Migration & Core Stability) — EXECUTING
 Plan: 1 of 4
-Status: Executing Phase 01
-Last activity: 2026-03-28 -- Phase 01 execution started
+Status: In progress
+Last activity: 2026-03-28 — Plan 01-01 complete
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -52,6 +52,7 @@ Progress: [░░░░░░░░░░] 0%
 - Trend: —
 
 *Updated after each plan completion*
+| Phase 01-api-migration-core-stability P01 | 4 | 1 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -63,6 +64,7 @@ Recent decisions affecting current work:
 - Claude API as primary (not Ollama): Ollama format was scaffolding; full migration needed before anything else works
 - No streaming API: Coherent GT binding layer not designed for incremental updates — use `stream: false` with loading indicator
 - Brave Search over Bing: Free tier (2,000/month), single header auth, fits existing async HTTP pattern
+- [Phase 01-api-migration-core-stability]: Old OllamaApiKey/OllamaModel/OllamaBaseUrl fields deleted entirely per D-01; new ClaudeApiKey/ClaudeModel primary + OllamaFallback* optional section with claude-sonnet-4-6 default (D-02) and localhost:11434 Ollama default (D-03)
 
 ### Pending Todos
 
@@ -77,6 +79,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-28T17:31:56.519Z
-Stopped at: Phase 5 UI-SPEC approved
-Resume file: .planning/phases/05-memory-file-explorer/05-UI-SPEC.md
+Last session: 2026-03-28T22:45:16.561Z
+Stopped at: Completed 01-api-migration-core-stability/01-01-PLAN.md
+Resume file: None
