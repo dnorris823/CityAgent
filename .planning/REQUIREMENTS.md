@@ -8,14 +8,14 @@
 ### Core Stability
 
 - [ ] **CORE-01**: File writes (narrative log, chat session, screenshot encode) execute off the main game thread — no UI freezes during I/O
-- [ ] **CORE-02**: Concurrent API requests are safe — `PendingResult` uses `Interlocked.Exchange` to prevent race conditions when heartbeat adds parallel requests
+- [x] **CORE-02**: Concurrent API requests are safe — `PendingResult` uses `Interlocked.Exchange` to prevent race conditions when heartbeat adds parallel requests
 - [ ] **CORE-03**: End-to-end tested — full build → deploy → in-game cycle passes with screenshot, tool calls, narrative memory, and response rendering working together
 
 ### API Integration
 
-- [ ] **API-01**: Claude API (`/v1/messages`) format is fully supported — correct headers (`x-api-key`, `anthropic-version`), system as top-level field, image content blocks, `tool_result` as user role with `tool_use_id`
+- [x] **API-01**: Claude API (`/v1/messages`) format is fully supported — correct headers (`x-api-key`, `anthropic-version`), system as top-level field, image content blocks, `tool_result` as user role with `tool_use_id`
 - [ ] **API-02**: Ollama API (`/v1/chat/completions`) format is supported alongside Claude — user can select provider in settings
-- [ ] **API-03**: Automatic rate-limit fallback — when Claude returns HTTP 429, system retries with configured Ollama endpoint (or surfaces clear error if no fallback configured)
+- [x] **API-03**: Automatic rate-limit fallback — when Claude returns HTTP 429, system retries with configured Ollama endpoint (or surfaces clear error if no fallback configured)
 - [ ] **API-04**: User-configurable model name in mod settings — changes take effect without restarting the game
 
 ### Chat UI
@@ -90,11 +90,11 @@
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | CORE-01 | Phase 1 | Pending |
-| CORE-02 | Phase 1 | Pending |
+| CORE-02 | Phase 1 | Complete |
 | CORE-03 | Phase 1 | Pending |
-| API-01 | Phase 1 | Pending |
+| API-01 | Phase 1 | Complete |
 | API-02 | Phase 1 | Pending |
-| API-03 | Phase 1 | Pending |
+| API-03 | Phase 1 | Complete |
 | API-04 | Phase 1 | Pending |
 | UI-01 | Phase 2 | Pending |
 | UI-02 | Phase 2 | Pending |

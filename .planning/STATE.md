@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Phase 5 plans created — ready to execute
-last_updated: "2026-03-28T18:00:00.000Z"
+stopped_at: Completed 01-03-PLAN.md
+last_updated: "2026-03-28T22:52:47.785Z"
 last_activity: 2026-03-26 — Roadmap created
 progress:
   total_phases: 6
   completed_phases: 0
-  total_plans: 15
-  completed_plans: 0
+  total_plans: 18
+  completed_plans: 1
   percent: 0
 ---
 
@@ -52,6 +52,7 @@ Progress: [░░░░░░░░░░] 0%
 - Trend: —
 
 *Updated after each plan completion*
+| Phase 01 P03 | 3 | 1 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -63,6 +64,9 @@ Recent decisions affecting current work:
 - Claude API as primary (not Ollama): Ollama format was scaffolding; full migration needed before anything else works
 - No streaming API: Coherent GT binding layer not designed for incremental updates — use `stream: false` with loading indicator
 - Brave Search over Bing: Free tier (2,000/month), single header auth, fits existing async HTTP pattern
+- [Phase 01]: Anthropic format uses x-api-key header and top-level system field (not Authorization:Bearer, not in messages array)
+- [Phase 01]: HTTP 429 sentinel __429__ for rate-limit fallback routing; 400/401/500 show [Error]: without Ollama fallback
+- [Phase 01]: Interlocked.Exchange replaces volatile on PendingResult for stronger thread-safety memory barrier
 
 ### Pending Todos
 
@@ -77,6 +81,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-28T17:31:56.519Z
-Stopped at: Phase 5 UI-SPEC approved
-Resume file: .planning/phases/05-memory-file-explorer/05-UI-SPEC.md
+Last session: 2026-03-28T22:52:47.782Z
+Stopped at: Completed 01-03-PLAN.md
+Resume file: None
