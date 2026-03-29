@@ -20,9 +20,9 @@
 
 ### Chat UI
 
-- [ ] **UI-01**: User and assistant messages are visually distinct — different bubble styles, alignment, or color differentiation
-- [ ] **UI-02**: Claude responses render markdown correctly — headers, bold, italic, unordered lists, code blocks display as formatted text (no raw asterisks)
-- [ ] **UI-03**: Loading / thinking indicator is visible while Claude generates a response — animation or status text in the panel
+- [x] **UI-01**: User and assistant messages are visually distinct — different bubble styles, alignment, or color differentiation
+- [x] **UI-02**: Claude responses render markdown correctly — headers, bold, italic, unordered lists, code blocks display as formatted text (no raw asterisks)
+- [x] **UI-03**: Loading / thinking indicator is visible while Claude generates a response — animation or status text in the panel
 
 ### City Data Tools
 
@@ -96,9 +96,9 @@
 | API-02 | Phase 1 | Complete |
 | API-03 | Phase 1 | Complete |
 | API-04 | Phase 1 | Complete |
-| UI-01 | Phase 2 | Pending |
-| UI-02 | Phase 2 | Pending |
-| UI-03 | Phase 2 | Pending |
+| UI-01 | Phase 2 | Complete |
+| UI-02 | Phase 2 | Complete |
+| UI-03 | Phase 2 | Complete |
 | DATA-01 | Phase 3 | Pending |
 | DATA-02 | Phase 3 | Pending |
 | DATA-03 | Phase 3 | Pending |

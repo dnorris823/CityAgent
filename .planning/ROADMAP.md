@@ -46,11 +46,11 @@ Plans:
   1. User messages and Claude responses are visually distinct — different alignment, color, or bubble style makes the conversation easy to scan
   2. Claude's formatted responses display as rendered text — headers appear as headers, bold text is bold, bullet lists are indented, no raw asterisks visible
   3. A loading or thinking indicator is visible from the moment a message is sent until the response appears
-**Plans:** 3 plans
+**Plans:** 2/3 plans executed
 Plans:
-- [ ] 02-01-PLAN.md — C# data layer: error role promotion + thinking strip + API payload filter
+- [x] 02-01-PLAN.md — C# data layer: error role promotion + thinking strip + API payload filter
 - [ ] 02-02-PLAN.md — React UI: 3-way message renderer, loading status text, type-ahead queue, welcome block
-- [ ] 02-03-PLAN.md — renderMarkdown fixes: nested lists, italic regex, code language label
+- [x] 02-03-PLAN.md — renderMarkdown fixes: nested lists, italic regex, code language label
 
 ### Phase 3: Extended City Data Tools
 **Goal**: The advisor has structured access to budget, traffic, and services data — and the player controls which tools are active
@@ -120,7 +120,7 @@ Note: Phase 4 depends only on Phase 1 (not Phase 2 or 3) and could execute in pa
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. API Migration & Core Stability | 1/4 | In Progress|  |
-| 2. Chat UI Polish | 0/3 | Planning complete | - |
+| 2. Chat UI Polish | 2/3 | In Progress|  |
 | 3. Extended City Data Tools | 0/3 | Planning complete | - |
 | 4. Web Search Tool | 0/2 | Planning complete | - |
 | 5. Memory File Explorer | 0/3 | Planning complete | - |
