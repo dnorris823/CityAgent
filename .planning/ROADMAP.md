@@ -49,7 +49,7 @@ Plans:
 **Plans:** 2/3 plans executed
 Plans:
 - [x] 02-01-PLAN.md — C# data layer: error role promotion + thinking strip + API payload filter
-- [ ] 02-02-PLAN.md — React UI: 3-way message renderer, loading status text, type-ahead queue, welcome block
+- [x] 02-02-PLAN.md — React UI: 3-way message renderer, loading status text, type-ahead queue, welcome block
 - [x] 02-03-PLAN.md — renderMarkdown fixes: nested lists, italic regex, code language label
 
 ### Phase 3: Extended City Data Tools
