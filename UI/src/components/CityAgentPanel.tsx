@@ -3,7 +3,7 @@ import { bindValue, useValue, trigger } from "cs2/api";
 import { renderMarkdown } from "../utils/renderMarkdown";
 
 interface ChatMessage {
-  role: "user" | "assistant";
+  role: "user" | "assistant" | "system";
   content: string;
   hadImage: boolean;
 }
@@ -115,6 +115,33 @@ const CityAgentInner: React.FC = () => {
   const [dragPos, setDragPos] = useState<{ x: number; y: number } | null>(null);
   const [resizedDims, setResizedDims] = useState<{ w: number; h: number } | null>(null);
 
+  // Phase 2: queued message (type-ahead while loading) — stored as ref to avoid double-send (D-09/D-10)
+  const pendingQueuedMsg = useRef<string | null>(null);
+  const [queuedChipText, setQueuedChipText] = useState<string | null>(null);
+
+  // Phase 2: loading status text (D-06) — phrase index driven by interval
+  const LOADING_PHRASES = [
+    "Surveying the city...",
+    "Consulting the records...",
+    "Studying the districts...",
+    "Reviewing the latest reports...",
+    "Checking in with the planners...",
+    "Analyzing the situation...",
+  ];
+  const [loadingPhrase, setLoadingPhrase] = useState(LOADING_PHRASES[0]);
+
+  // Phase 2: welcome greeting (D-11) — selected randomly on mount and on clearChat
+  const WELCOME_GREETINGS = [
+    "Welcome back, Mayor. The city awaits.",
+    "Your advisor is ready. What would you like to know?",
+    "The city has been busy. Ask me anything.",
+    "Ready to help. What's on your mind, Mayor?",
+    "All systems nominal. How can I assist?",
+  ];
+  const [welcomeGreeting] = useState(
+    () => WELCOME_GREETINGS[Math.floor(Math.random() * WELCOME_GREETINGS.length)]
+  );
+
   // Reset drag position and local resize when settings-based dimensions change
   const prevBindingDims = useRef({ w: panelWidth, h: panelHeight });
   useEffect(() => {
@@ -144,14 +171,47 @@ const CityAgentInner: React.FC = () => {
     if (el) el.scrollTop = el.scrollHeight;
   }, [messages, isLoading]);
 
-  const canSend = inputText.trim().length > 0 && !isLoading;
+  // Phase 2: Cycle loading status phrases while isLoading is true (D-06)
+  // Pitfall: clearInterval in cleanup — otherwise setState fires on unmounted path
+  useEffect(() => {
+    if (!isLoading) {
+      setLoadingPhrase(LOADING_PHRASES[0]); // reset for next load
+      return;
+    }
+    const id = setInterval(() => {
+      setLoadingPhrase(LOADING_PHRASES[Math.floor(Date.now() / 2500) % LOADING_PHRASES.length]);
+    }, 2500);
+    return () => clearInterval(id);
+  }, [isLoading]);
+
+  // Phase 2: Auto-send queued message when loading finishes (D-10)
+  // Pitfall: Use ref (not state) for the queued message to avoid double-send on re-render
+  useEffect(() => {
+    if (!isLoading && pendingQueuedMsg.current) {
+      const msg = pendingQueuedMsg.current;
+      pendingQueuedMsg.current = null;
+      setQueuedChipText(null);
+      safeTrigger("cityAgent", "sendMessage", msg);
+    }
+  }, [isLoading]);
+
+  const canSend = inputText.trim().length > 0 && (isLoading ? pendingQueuedMsg.current === null : true);
 
   const handleSend = useCallback(() => {
-    if (!canSend) return;
-    console.log("[CityAgent] Sending message:", inputText.trim().substring(0, 80));
-    safeTrigger("cityAgent", "sendMessage", inputText.trim());
-    setInputText("");
-  }, [inputText, canSend]);
+    const text = inputText.trim();
+    if (!text) return;
+    if (isLoading) {
+      // Queue the message — it will auto-send when loading finishes (D-09)
+      pendingQueuedMsg.current = text;
+      setQueuedChipText(text);
+      setInputText("");
+      console.log("[CityAgent] Message queued (loading in progress):", text.substring(0, 80));
+    } else {
+      console.log("[CityAgent] Sending message:", text.substring(0, 80));
+      safeTrigger("cityAgent", "sendMessage", text);
+      setInputText("");
+    }
+  }, [inputText, isLoading]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -315,22 +375,39 @@ const CityAgentInner: React.FC = () => {
           </header>
 
           <div className="ca-messages" ref={messagesContainerRef}>
-            {messages.map((msg, i) => (
-              <div key={i} className={`ca-bubble ca-bubble--${msg.role}`}>
-                {msg.hadImage && (
-                  <span className="ca-bubble__image-badge">screenshot attached</span>
-                )}
-                {msg.role === "assistant" ? (
-                  <div className="ca-bubble__text ca-markdown" dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.content) }} />
-                ) : (
-                  <span className="ca-bubble__text">{msg.content}</span>
-                )}
-              </div>
-            ))}
+            {messages.map((msg, i) => {
+              if (msg.role === "system") {
+                // System notices render as center pills, not bubbles (D-01)
+                const isError = msg.content.startsWith("[Error]:");
+                const pillClass = isError ? "ca-notice-pill ca-notice-pill--error" : "ca-notice-pill ca-notice-pill--warning";
+                const text = msg.content.replace(/^\[Error\]:\s*/, "");
+                return (
+                  <div key={i} className={pillClass}>
+                    {text}
+                  </div>
+                );
+              }
+              return (
+                <div key={i} className={`ca-bubble ca-bubble--${msg.role}`}>
+                  {msg.hadImage && (
+                    <span className="ca-bubble__image-badge">screenshot attached</span>
+                  )}
+                  {msg.role === "assistant" ? (
+                    <div className="ca-bubble__text ca-markdown" dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.content) }} />
+                  ) : (
+                    <span className="ca-bubble__text">{msg.content}</span>
+                  )}
+                </div>
+              );
+            })}
             {isLoading && (
               <div className="ca-bubble ca-bubble--assistant">
                 <LoadingDots />
+                <span className="ca-loading-status">{loadingPhrase}</span>
               </div>
+            )}
+            {messages.length === 0 && !isLoading && (
+              <div className="ca-welcome">{welcomeGreeting}</div>
             )}
           </div>
 
@@ -339,6 +416,15 @@ const CityAgentInner: React.FC = () => {
               <div className="ca-screenshot-chip">
                 <span>screenshot ready</span>
                 <button onClick={() => safeTrigger("cityAgent", "removeScreenshot")}>✕</button>
+              </div>
+            )}
+            {queuedChipText && (
+              <div className="ca-queued-chip">
+                <span>queued: {queuedChipText.length > 40 ? queuedChipText.substring(0, 40) + "..." : queuedChipText}</span>
+                <button onClick={() => {
+                  pendingQueuedMsg.current = null;
+                  setQueuedChipText(null);
+                }}>✕</button>
               </div>
             )}
             <div className="ca-input-row">
