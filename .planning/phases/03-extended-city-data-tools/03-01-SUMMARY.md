@@ -133,3 +133,13 @@ None — no external service configuration required. The new tools will become a
 ---
 *Phase: 03-extended-city-data-tools*
 *Completed: 2026-03-29*
+
+## Self-Check: PASSED
+
+- FOUND: src/Systems/CityDataSystem.cs
+- FOUND: src/Systems/Tools/GetBudgetTool.cs
+- FOUND: src/Systems/Tools/GetTrafficSummaryTool.cs
+- FOUND: src/Systems/Tools/GetServicesSummaryTool.cs
+- FOUND: .planning/phases/03-extended-city-data-tools/03-01-SUMMARY.md
+- FOUND commit: 447732b (Task 1 — CityDataSystem extensions)
+- FOUND commit: 83497c1 (Task 2 — three tool files)
