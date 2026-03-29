@@ -88,7 +88,12 @@
       "Bash(node \"$HOME/.claude/get-shit-done/bin/gsd-tools.cjs\" commit \"docs: create roadmap \\(6 phases\\)\" --files .planning/ROADMAP.md .planning/STATE.md .planning/REQUIREMENTS.md CLAUDE.md)",
       "Skill(gsd:discuss-phase)",
       "Skill(gsd:plan-phase)",
-      "Skill(gsd:ui-phase)"
+      "Skill(gsd:ui-phase)",
+      "Skill(gsd:fast)",
+      "Bash(cat \"/c/Coding Projects/CityAgent/Working/CityAgent/.planning/phases/01-api-migration-core-stability/\"*-VERIFICATION.md)",
+      "Bash(node \"$HOME/.claude/get-shit-done/bin/gsd-tools.cjs\" phase complete \"01\")",
+      "Bash(node \"$HOME/.claude/get-shit-done/bin/gsd-tools.cjs\" commit \"docs\\(phase-01\\): complete phase execution and verification\" --files .planning/ROADMAP.md .planning/STATE.md .planning/phases/01-api-migration-core-stability/01-VERIFICATION.md)",
+      "Bash(node \"$HOME/.claude/get-shit-done/bin/gsd-tools.cjs\" commit \"docs\\(phase-01\\): evolve PROJECT.md after phase completion\" --files .planning/PROJECT.md)"
     ]
   }
 }
