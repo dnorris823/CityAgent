@@ -203,7 +203,11 @@ function inlinePass(line: string): string {
   line = line.replace(/__(.+?)__/g, "<strong>$1</strong>");
   // Italic (* or _)
   line = line.replace(/\*(.+?)\*/g, "<em>$1</em>");
-  line = line.replace(/(?<!\w)_(.+?)_(?!\w)/g, "<em>$1</em>");
+  line = line.replace(/(^|[\s.,!?;:'"([{])_([^_]+?)_([\s.,!?;:'")\]}]|$)/g,
+    function(_m, pre, content, post) {
+      return pre + "<em>" + content + "</em>" + post;
+    }
+  );
   // Strikethrough
   line = line.replace(/~~(.+?)~~/g, "<del>$1</del>");
   // Links [text](url)
@@ -232,6 +236,10 @@ export function renderMarkdown(markdown: string): string {
         i++;
       }
       i++; // skip closing ```
+      var lang = fenceMatch[1];
+      if (lang) {
+        out.push('<span class="ca-code-lang">' + escapeHtml(lang) + "</span>");
+      }
       out.push("<pre><code>" + codeLines.join("\n") + "</code></pre>");
       continue;
     }
@@ -271,9 +279,42 @@ export function renderMarkdown(markdown: string): string {
 
     // Unordered list
     if (/^[\s]*[-*+]\s/.test(line)) {
+      // Determine baseline indent from the first item in this list
+      var baseIndentMatch = lines[i].match(/^(\s*)/);
+      var baseIndent = baseIndentMatch ? baseIndentMatch[1].length : 0;
       out.push("<ul>");
       while (i < lines.length && /^[\s]*[-*+]\s/.test(lines[i])) {
-        out.push("<li>" + inlinePass(lines[i].replace(/^[\s]*[-*+]\s+/, "")) + "</li>");
+        var itemIndentMatch = lines[i].match(/^(\s*)/);
+        var itemIndent = itemIndentMatch ? itemIndentMatch[1].length : 0;
+        var isSub = itemIndent > baseIndent;
+        var itemText = inlinePass(lines[i].replace(/^[\s]*[-*+]\s+/, ""));
+        if (isSub) {
+          // Sub-item: wrap in nested <ul>
+          out.push("<li><ul><li>" + itemText + "</li></ul></li>");
+        } else {
+          // Check if next line is a sub-item (to embed the sub-list inside this <li>)
+          var nextIdx = i + 1;
+          var hasSubNext = nextIdx < lines.length && /^[\s]*[-*+]\s/.test(lines[nextIdx]);
+          var nextIndentMatch = hasSubNext ? lines[nextIdx].match(/^(\s*)/) : null;
+          var nextIndent = nextIndentMatch ? nextIndentMatch[1].length : 0;
+          if (hasSubNext && nextIndent > baseIndent) {
+            // Collect the sub-items that follow this top-level item
+            i++;
+            var subItems = "";
+            while (i < lines.length && /^[\s]*[-*+]\s/.test(lines[i])) {
+              var subIndentMatch = lines[i].match(/^(\s*)/);
+              var subIndent = subIndentMatch ? subIndentMatch[1].length : 0;
+              if (subIndent <= baseIndent) break; // back to top level
+              var subText = inlinePass(lines[i].replace(/^[\s]*[-*+]\s+/, ""));
+              subItems += "<li>" + subText + "</li>";
+              i++;
+            }
+            out.push("<li>" + itemText + "<ul>" + subItems + "</ul></li>");
+            continue; // i already advanced
+          } else {
+            out.push("<li>" + itemText + "</li>");
+          }
+        }
         i++;
       }
       out.push("</ul>");
