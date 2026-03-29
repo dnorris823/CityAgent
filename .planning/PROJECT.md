@@ -31,9 +31,9 @@ You ask Claude something about your city, it sees the current screenshot and liv
 
 *What we're building toward for v1 personal use*
 
-- [ ] **Chat UI polish** — proper chat bubble styling (user vs assistant visually distinct), scrollable history, clean typography
-- [ ] **Markdown rendering quality** — Claude's formatted responses render correctly (headers, bold, lists, code blocks — no raw asterisks)
-- [ ] **Loading / thinking indicator** — visible feedback in the panel while Claude is generating a response
+- ✓ **Chat UI polish** — 3-way message renderer (user=right blue, assistant=left dark, system=center pill), loading status text rotation, queued-message chip, welcome greeting — validated Phase 2
+- ✓ **Markdown rendering quality** — nested lists, Coherent GT-safe italic regex, fenced code language labels, bold+heading coexistence — validated Phase 2
+- ✓ **Loading / thinking indicator** — bouncing dots + rotating city-flavored status text; `<thinking>` blocks stripped from responses — validated Phase 2
 - [ ] **Memory file explorer** — in-panel file system view: browse the per-city narrative memory tree, view/edit/delete individual files
 - [ ] **Web search tool** — `search_web(query)` agent tool backed by Brave/Bing Search API; API key configurable in mod settings; Claude uses it to ground recommendations in real urban planning sources
 - [ ] **Proactive heartbeat system** — Claude periodically checks city stats in the background and surfaces noteworthy events, anomalies, or suggestions; interval and behavior configurable
@@ -49,7 +49,7 @@ You ask Claude something about your city, it sees the current screenshot and liv
 
 ## Context
 
-- **Codebase state**: Phase 1 complete. `ClaudeAPISystem` sends correct Anthropic `/v1/messages` format with tool-use loop, vision input, and Ollama as an explicit primary provider option. All file I/O is async. Thread safety uses `Interlocked.Exchange`. End-to-end pipeline validated in-game. Several planned features (UI polish, heartbeat, memory explorer, web search) remain.
+- **Codebase state**: Phase 2 complete. Chat UI polished: 3-way message bubbles, loading status animation, queued-send chip, welcome greeting. Markdown renderer fixed for nested lists, Coherent GT-safe italic, and code language labels. Error strings promoted to `role='system'` in C#; `<thinking>` blocks stripped before display. Remaining planned features: memory file explorer, web search tool, heartbeat system.
 - **Persona**: Claude shifts roles based on context — narrating events (CityPlannerPlays energy), advising on strategy (urban planning expert), and chronicling the city's ongoing story (historian). The narrative memory system is the foundation of continuity.
 - **Tech environment**: Unity 2022.3.7f1 DOTS/ECS, .NET Standard 2.1 DLL, React/TypeScript in Coherent GT (CS2's embedded Chromium). No npm packages — React, react-dom, and cs2 bindings are runtime-injected externals.
 - **Developer**: Single developer, VSCode (not Visual Studio), working toward personal-use v1.
