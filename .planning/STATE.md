@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 02-01-PLAN.md
-last_updated: "2026-03-29T03:21:15.308Z"
+stopped_at: Completed 02-03-PLAN.md
+last_updated: "2026-03-29T03:21:23.621Z"
 last_activity: 2026-03-29
 progress:
   total_phases: 6
@@ -78,6 +78,9 @@ Recent decisions affecting current work:
 - [Phase 01]: volatile removed from ClaudeAPISystem.PendingResult — Interlocked.Exchange provides stronger guarantees and CS0420 prevents passing volatile ref
 - [Phase 02-01]: Regex inline fully qualified (System.Text.RegularExpressions.Regex) — no new using directive needed
 - [Phase 02-01]: D-04 expressed as comment marker only — RunClaudeRequestAsync does not yet iterate m_History so there is nothing to filter at this point
+- [Phase 02-chat-ui-polish]: Italic regex: replaced lookbehind with character class boundary groups for Coherent GT V8 compatibility
+- [Phase 02-chat-ui-polish]: Nested list: relative baseIndent comparison (itemIndent > baseIndent) handles both 2-space and 4-space Claude indent
+- [Phase 02-chat-ui-polish]: Code language label: block-level .ca-code-lang span before <pre> for visual merging via top-rounded CSS corners
 
 ### Pending Todos
 
@@ -90,6 +93,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-28T00:00:00Z
-Stopped at: Completed 02-01-PLAN.md
+Last session: 2026-03-29T03:21:23.618Z
+Stopped at: Completed 02-03-PLAN.md
 Resume file: None
