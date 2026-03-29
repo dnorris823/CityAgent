@@ -11,8 +11,8 @@ namespace CityAgent
     public enum ProviderChoice { Claude, Ollama }
 
     [FileLocation(nameof(CityAgent))]
-    [SettingsUIGroupOrder(kProviderGroup, kClaudeGroup, kOllamaGroup, kUIGroup, kMemoryGroup)]
-    [SettingsUIShowGroupName(kProviderGroup, kClaudeGroup, kOllamaGroup, kUIGroup, kMemoryGroup)]
+    [SettingsUIGroupOrder(kProviderGroup, kClaudeGroup, kOllamaGroup, kUIGroup, kMemoryGroup, kDataToolsGroup)]
+    [SettingsUIShowGroupName(kProviderGroup, kClaudeGroup, kOllamaGroup, kUIGroup, kMemoryGroup, kDataToolsGroup)]
     public class Setting : ModSetting
     {
         public const string kSection       = "Main";
@@ -20,13 +20,24 @@ namespace CityAgent
         public const string kClaudeGroup   = "Claude";
         public const string kOllamaGroup   = "Ollama";
         public const string kUIGroup       = "UI";
-        public const string kMemoryGroup   = "Memory";
+        public const string kMemoryGroup    = "Memory";
+        public const string kDataToolsGroup = "DataTools";
 
         private const string DefaultSystemPrompt =
             "You are CityAgent, an AI city planning advisor in the style of CityPlannerPlays. " +
             "Analyze the city screenshot and data, then provide engaging narrative commentary and " +
             "specific build recommendations. Be enthusiastic but practical. Focus on what would " +
-            "make the most impact for the city's current challenges.";
+            "make the most impact for the city's current challenges.\n\n" +
+            "You have access to live city data tools. Use them proactively when relevant:\n" +
+            "- get_population: Call when discussing growth, housing, or demographics.\n" +
+            "- get_building_demand: Call when advising on what to zone or build next.\n" +
+            "- get_workforce: Call when discussing employment, jobs, or economic productivity.\n" +
+            "- get_zoning_summary: Call when analyzing zone balance or development patterns.\n" +
+            "- get_budget: Call when discussing city finances, taxes, expenses, loans, or fiscal health.\n" +
+            "- get_traffic_summary: Call when discussing traffic, congestion, road networks, or commute quality.\n" +
+            "- get_services_summary: Call when discussing utilities (power, water, sewage) or public health.\n\n" +
+            "Always call relevant tools before answering questions about these topics. " +
+            "Combine tool data with the screenshot for comprehensive analysis.";
 
         public Setting(IMod mod) : base(mod) { }
 
@@ -103,6 +114,30 @@ namespace CityAgent
         [SettingsUISlider(min = 5, max = 100, step = 5)]
         public int MaxChatHistorySessions { get; set; } = 20;
 
+
+        // --- Data Tools section ---
+
+        [SettingsUISection(kSection, kDataToolsGroup)]
+        public bool EnablePopulationTool { get; set; } = true;
+
+        [SettingsUISection(kSection, kDataToolsGroup)]
+        public bool EnableBuildingDemandTool { get; set; } = true;
+
+        [SettingsUISection(kSection, kDataToolsGroup)]
+        public bool EnableWorkforceTool { get; set; } = true;
+
+        [SettingsUISection(kSection, kDataToolsGroup)]
+        public bool EnableZoningSummaryTool { get; set; } = true;
+
+        [SettingsUISection(kSection, kDataToolsGroup)]
+        public bool EnableBudgetTool { get; set; } = true;
+
+        [SettingsUISection(kSection, kDataToolsGroup)]
+        public bool EnableTrafficSummaryTool { get; set; } = true;
+
+        [SettingsUISection(kSection, kDataToolsGroup)]
+        public bool EnableServicesSummaryTool { get; set; } = true;
+
         public override void SetDefaults()
         {
             Provider               = ProviderChoice.Ollama;
@@ -118,6 +153,13 @@ namespace CityAgent
             FontSize               = 14;
             MaxNarrativeLogEntries = 50;
             MaxChatHistorySessions = 20;
+            EnablePopulationTool      = true;
+            EnableBuildingDemandTool  = true;
+            EnableWorkforceTool       = true;
+            EnableZoningSummaryTool   = true;
+            EnableBudgetTool          = true;
+            EnableTrafficSummaryTool  = true;
+            EnableServicesSummaryTool = true;
         }
     }
 
@@ -178,6 +220,23 @@ namespace CityAgent
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.MaxNarrativeLogEntries)),   "Maximum entries in narrative-log.md before older entries are archived (10–200)." },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.MaxChatHistorySessions)),  "Max Chat History Sessions" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.MaxChatHistorySessions)),   "Number of recent chat sessions to keep. Older sessions are auto-deleted (5–100)." },
+
+                // Data Tools group
+                { m_Setting.GetOptionGroupLocaleID(Setting.kDataToolsGroup), "Data Tools" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.EnablePopulationTool)),      "Population" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.EnablePopulationTool)),       "Include population data tool in AI requests." },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.EnableBuildingDemandTool)),  "Building Demand" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.EnableBuildingDemandTool)),   "Include building demand data tool in AI requests." },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.EnableWorkforceTool)),       "Workforce" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.EnableWorkforceTool)),        "Include workforce data tool in AI requests." },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.EnableZoningSummaryTool)),   "Zoning Summary" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.EnableZoningSummaryTool)),    "Include zoning summary data tool in AI requests." },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.EnableBudgetTool)),          "City Finances" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.EnableBudgetTool)),           "Include city budget and loan data tool in AI requests." },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.EnableTrafficSummaryTool)),  "Traffic" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.EnableTrafficSummaryTool)),   "Include traffic flow and congestion data tool in AI requests." },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.EnableServicesSummaryTool)), "City Services" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.EnableServicesSummaryTool)),  "Include electricity, water, sewage, and health data tool in AI requests." },
             };
         }
 
