@@ -156,7 +156,15 @@ namespace CityAgent.Systems
             string? result = Interlocked.Exchange(ref m_ClaudeAPI.PendingResult, null);
             if (result != null)
             {
-                m_History.Add(new ChatMessage { role = "assistant", content = result });
+                // Strip <thinking>...</thinking> blocks (extended thinking model output) (D-18)
+                result = System.Text.RegularExpressions.Regex.Replace(
+                    result,
+                    @"<thinking>[\s\S]*?</thinking>",
+                    "",
+                    System.Text.RegularExpressions.RegexOptions.IgnoreCase).Trim();
+                // Promote API errors to system role so React renders them as notice pills (D-05)
+                string role = result.StartsWith("[Error]:") ? "system" : "assistant";
+                m_History.Add(new ChatMessage { role = role, content = result });
                 PushMessagesBinding();
                 m_IsLoading.Update(false);
                 PersistChatSession();
