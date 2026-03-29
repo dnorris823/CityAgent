@@ -63,7 +63,7 @@ Plans:
   4. Player can toggle individual data tools on or off in mod settings — disabled tools are not included in any API call
 **Plans:** 3 plans
 Plans:
-- [ ] 03-01-PLAN.md — CityDataSystem ECS expansion + budget/traffic/services tool implementations
+- [x] 03-01-PLAN.md — CityDataSystem ECS expansion + budget/traffic/services tool implementations
 - [ ] 03-02-PLAN.md — Settings Data Tools toggles + CityToolRegistry filtering + tool registration + system prompt
 - [ ] 03-03-PLAN.md — Build, deploy, and in-game verification of all new tools and toggles
 

@@ -26,10 +26,10 @@
 
 ### City Data Tools
 
-- [ ] **DATA-01**: `get_budget()` tool returns city financial data — income, expenses, current balance from ECS
-- [ ] **DATA-02**: `get_traffic_summary()` tool returns traffic conditions — congestion level or flow indicator from ECS
-- [ ] **DATA-03**: `get_services_summary()` tool returns city service coverage levels from ECS
-- [ ] **DATA-04**: All available ECS data is exposed as agent tools — additional data surfaces (noise, pollution, land value, happiness, etc.) are implemented as tools when ECS queries are confirmed available
+- [x] **DATA-01**: `get_budget()` tool returns city financial data — income, expenses, current balance from ECS
+- [x] **DATA-02**: `get_traffic_summary()` tool returns traffic conditions — congestion level or flow indicator from ECS
+- [x] **DATA-03**: `get_services_summary()` tool returns city service coverage levels from ECS
+- [x] **DATA-04**: All available ECS data is exposed as agent tools — additional data surfaces (noise, pollution, land value, happiness, etc.) are implemented as tools when ECS queries are confirmed available
 - [ ] **DATA-05**: Mod settings include per-tool enable/disable toggles — user can turn off individual data tools to manage context window usage and cost
 
 ### Web Search
@@ -99,10 +99,10 @@
 | UI-01 | Phase 2 | Complete |
 | UI-02 | Phase 2 | Complete |
 | UI-03 | Phase 2 | Complete |
-| DATA-01 | Phase 3 | Pending |
-| DATA-02 | Phase 3 | Pending |
-| DATA-03 | Phase 3 | Pending |
-| DATA-04 | Phase 3 | Pending |
+| DATA-01 | Phase 3 | Complete |
+| DATA-02 | Phase 3 | Complete |
+| DATA-03 | Phase 3 | Complete |
+| DATA-04 | Phase 3 | Complete |
 | DATA-05 | Phase 3 | Pending |
 | SRCH-01 | Phase 4 | Pending |
 | SRCH-02 | Phase 4 | Pending |
