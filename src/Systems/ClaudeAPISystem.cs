@@ -201,6 +201,10 @@ namespace CityAgent.Systems
                 ["text"] = userMessage
             });
 
+            // D-04 (Phase 2): When chat history is appended to this messages list, filter out
+            // any entries where role == "system" — those are UI-only notice pills and must
+            // never be sent to the Claude API.
+            // Example filter: history.Where(m => m.role != "system").ToList()
             var messages = new List<JObject>
             {
                 new JObject { ["role"] = "user", ["content"] = userContent }
