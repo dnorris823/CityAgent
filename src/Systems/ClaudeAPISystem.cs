@@ -38,6 +38,9 @@ namespace CityAgent.Systems
             m_ToolRegistry.Register(new GetBuildingDemandTool(m_CityDataSystem));
             m_ToolRegistry.Register(new GetWorkforceTool(m_CityDataSystem));
             m_ToolRegistry.Register(new GetZoningSummaryTool(m_CityDataSystem));
+            m_ToolRegistry.Register(new GetBudgetTool(m_CityDataSystem));
+            m_ToolRegistry.Register(new GetTrafficSummaryTool(m_CityDataSystem));
+            m_ToolRegistry.Register(new GetServicesSummaryTool(m_CityDataSystem));
 
             // Memory tools
             m_ToolRegistry.Register(new ReadMemoryFileTool(m_NarrativeMemory));
