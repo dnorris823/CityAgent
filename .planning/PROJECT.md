@@ -37,19 +37,19 @@ You ask Claude something about your city, it sees the current screenshot and liv
 - [ ] **Memory file explorer** — in-panel file system view: browse the per-city narrative memory tree, view/edit/delete individual files
 - [ ] **Web search tool** — `search_web(query)` agent tool backed by Brave/Bing Search API; API key configurable in mod settings; Claude uses it to ground recommendations in real urban planning sources
 - [ ] **Proactive heartbeat system** — Claude periodically checks city stats in the background and surfaces noteworthy events, anomalies, or suggestions; interval and behavior configurable
-- [ ] **Claude API format** — `ClaudeAPISystem` sends requests in Claude API format (not Ollama-native); model is user-configurable in settings
-- [ ] **End-to-end validated** — full build → deploy → in-game cycle tested with screenshot, tool calls, narrative memory, and response rendering working together
+- ✓ **Claude API format** — `ClaudeAPISystem` sends correct `/v1/messages` format; explicit provider toggle (Claude API / Ollama) in settings — validated Phase 1
+- ✓ **End-to-end validated** — full build → deploy → in-game cycle approved at human-verify checkpoint — validated Phase 1
 
 ### Out of Scope
 
 - Multiplayer / shared sessions — single-player advisor only; the city story is personal
 - Paradox Mods public distribution — v1 is for personal use; publishing is a future milestone
 - Auto-play / city control — Claude advises and narrates; it never places zones, roads, or buildings
-- Non-Anthropic models in v1 — configurable model name targets Claude models; local LLM support (Ollama) may be revisited post-v1
+- Non-Anthropic models in v1 — Revised: Ollama is now a first-class provider option via the provider toggle added in Phase 1
 
 ## Context
 
-- **Codebase state**: Well-scaffolded Phase 5+ implementation. All major systems exist but haven't been tested end-to-end. `ClaudeAPISystem` currently sends Ollama-native `/api/chat` format (with a configurable base URL) rather than Claude API format — this needs to change. Several planned features (heartbeat, memory explorer, web search) are new.
+- **Codebase state**: Phase 1 complete. `ClaudeAPISystem` sends correct Anthropic `/v1/messages` format with tool-use loop, vision input, and Ollama as an explicit primary provider option. All file I/O is async. Thread safety uses `Interlocked.Exchange`. End-to-end pipeline validated in-game. Several planned features (UI polish, heartbeat, memory explorer, web search) remain.
 - **Persona**: Claude shifts roles based on context — narrating events (CityPlannerPlays energy), advising on strategy (urban planning expert), and chronicling the city's ongoing story (historian). The narrative memory system is the foundation of continuity.
 - **Tech environment**: Unity 2022.3.7f1 DOTS/ECS, .NET Standard 2.1 DLL, React/TypeScript in Coherent GT (CS2's embedded Chromium). No npm packages — React, react-dom, and cs2 bindings are runtime-injected externals.
 - **Developer**: Single developer, VSCode (not Visual Studio), working toward personal-use v1.
@@ -67,8 +67,8 @@ You ask Claude something about your city, it sees the current screenshot and liv
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Claude API as primary (not Ollama) | Project goal is Claude integration; Ollama format was a scaffolding choice | — Pending migration |
-| User-configurable model name | Allows switching between claude-sonnet-4-6 and future models without a code change | — Pending |
+| Explicit provider toggle (Claude / Ollama) | User may not have a Claude API key; Ollama needed as a first-class option, not just a fallback | Implemented Phase 1 — dropdown in mod settings, defaults to Ollama |
+| User-configurable model name | Allows switching between models without a code change | Implemented Phase 1 |
 | Web search via Brave/Bing in C# backend | Keeps search calls on the C# side (same HTTP client pattern); Claude calls a tool, C# fetches results | — Pending |
 | Heartbeat as background system | Periodic proactive checks need their own CS2 system update loop; design TBD | — Pending |
 | Memory explorer in React panel | File system view embedded in the chat panel; reads/writes via existing memory tool bindings | — Pending |
@@ -92,4 +92,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-26 after initialization*
+*Last updated: 2026-03-29 after Phase 1 completion*
