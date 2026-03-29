@@ -3,20 +3,24 @@ using Colossal.IO.AssetDatabase;
 using Game.Modding;
 using Game.Settings;
 using Game.UI;
+using Game.UI.Widgets;
 using System.Collections.Generic;
 
 namespace CityAgent
 {
+    public enum ProviderChoice { Claude, Ollama }
+
     [FileLocation(nameof(CityAgent))]
-    [SettingsUIGroupOrder(kClaudeGroup, kOllamaGroup, kUIGroup, kMemoryGroup)]
-    [SettingsUIShowGroupName(kClaudeGroup, kOllamaGroup, kUIGroup, kMemoryGroup)]
+    [SettingsUIGroupOrder(kProviderGroup, kClaudeGroup, kOllamaGroup, kUIGroup, kMemoryGroup)]
+    [SettingsUIShowGroupName(kProviderGroup, kClaudeGroup, kOllamaGroup, kUIGroup, kMemoryGroup)]
     public class Setting : ModSetting
     {
-        public const string kSection = "Main";
-        public const string kClaudeGroup = "Claude";
-        public const string kOllamaGroup = "Ollama";
-        public const string kUIGroup = "UI";
-        public const string kMemoryGroup = "Memory";
+        public const string kSection       = "Main";
+        public const string kProviderGroup = "Provider";
+        public const string kClaudeGroup   = "Claude";
+        public const string kOllamaGroup   = "Ollama";
+        public const string kUIGroup       = "UI";
+        public const string kMemoryGroup   = "Memory";
 
         private const string DefaultSystemPrompt =
             "You are CityAgent, an AI city planning advisor in the style of CityPlannerPlays. " +
@@ -25,6 +29,23 @@ namespace CityAgent
             "make the most impact for the city's current challenges.";
 
         public Setting(IMod mod) : base(mod) { }
+
+        // --- Provider selection ---
+
+        [SettingsUISection(kSection, kProviderGroup)]
+        [SettingsUIDropdown(typeof(Setting), nameof(GetProviderOptions))]
+        public ProviderChoice Provider { get; set; } = ProviderChoice.Ollama;
+
+        public DropdownItem<ProviderChoice>[] GetProviderOptions() => new[]
+        {
+            new DropdownItem<ProviderChoice> { value = ProviderChoice.Claude, displayName = "Claude API (Anthropic)" },
+            new DropdownItem<ProviderChoice> { value = ProviderChoice.Ollama, displayName = "Ollama (local)" }
+        };
+
+        [SettingsUISection(kSection, kProviderGroup)]
+        public string ActiveProvider => Provider == ProviderChoice.Ollama
+            ? $"Active: Ollama — {(string.IsNullOrWhiteSpace(OllamaBaseUrl) ? "no URL set" : OllamaBaseUrl)}"
+            : (string.IsNullOrWhiteSpace(ClaudeApiKey) ? "Active: Claude API — no key set" : "Active: Claude API");
 
         // --- Claude API section ---
 
@@ -37,11 +58,6 @@ namespace CityAgent
         public string ClaudeModel { get; set; } = "claude-sonnet-4-6";
 
         [SettingsUISection(kSection, kClaudeGroup)]
-        public string ActiveProvider => string.IsNullOrWhiteSpace(ClaudeApiKey)
-            ? "Currently using: No API key configured"
-            : "Currently using: Claude API";
-
-        [SettingsUISection(kSection, kClaudeGroup)]
         [SettingsUITextInput]
         public string SystemPrompt { get; set; } = DefaultSystemPrompt;
 
@@ -49,19 +65,19 @@ namespace CityAgent
         [SettingsUITextInput]
         public string ScreenshotKeybind { get; set; } = "F8";
 
-        // --- Ollama Fallback (optional) section ---
+        // --- Ollama section ---
 
         [SettingsUISection(kSection, kOllamaGroup)]
         [SettingsUITextInput]
-        public string OllamaFallbackBaseUrl { get; set; } = "http://localhost:11434";
+        public string OllamaBaseUrl { get; set; } = "http://localhost:11434";
 
         [SettingsUISection(kSection, kOllamaGroup)]
         [SettingsUITextInput]
-        public string OllamaFallbackApiKey { get; set; } = string.Empty;
+        public string OllamaApiKey { get; set; } = string.Empty;
 
         [SettingsUISection(kSection, kOllamaGroup)]
         [SettingsUITextInput]
-        public string OllamaFallbackModel { get; set; } = "llama3.1:8b";
+        public string OllamaModel { get; set; } = "llama3.1:8b";
 
         // --- UI section ---
 
@@ -89,11 +105,12 @@ namespace CityAgent
 
         public override void SetDefaults()
         {
+            Provider               = ProviderChoice.Ollama;
             ClaudeApiKey           = string.Empty;
             ClaudeModel            = "claude-sonnet-4-6";
-            OllamaFallbackBaseUrl  = "http://localhost:11434";
-            OllamaFallbackApiKey   = string.Empty;
-            OllamaFallbackModel    = "llama3.1:8b";
+            OllamaBaseUrl          = "http://localhost:11434";
+            OllamaApiKey           = string.Empty;
+            OllamaModel            = "llama3.1:8b";
             SystemPrompt           = DefaultSystemPrompt;
             ScreenshotKeybind      = "F8";
             PanelWidth             = 520;
@@ -119,27 +136,32 @@ namespace CityAgent
                 { m_Setting.GetSettingsLocaleID(), "CityAgent" },
                 { m_Setting.GetOptionTabLocaleID(Setting.kSection), "Main" },
 
+                // Provider group
+                { m_Setting.GetOptionGroupLocaleID(Setting.kProviderGroup), "AI Provider" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.Provider)),        "Provider" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.Provider)),         "Choose which AI provider to use. Claude API requires an Anthropic API key. Ollama runs locally with no key needed." },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ActiveProvider)),  "Status" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.ActiveProvider)),   "Shows which AI provider is currently active." },
+
                 // Claude API group
                 { m_Setting.GetOptionGroupLocaleID(Setting.kClaudeGroup), "Claude API" },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ClaudeApiKey)),      "API Key" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.ClaudeApiKey)),       "Your Anthropic API key. Never share this." },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ClaudeModel)),       "Model" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.ClaudeModel)),        "Claude model ID (default: claude-sonnet-4-6)" },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ActiveProvider)),    "Status" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.ActiveProvider)),     "Shows which AI provider is currently active" },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.SystemPrompt)),      "System Prompt" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.SystemPrompt)),       "Advisor persona prompt sent to the AI at the start of every conversation." },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.ScreenshotKeybind)), "Screenshot Keybind" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.ScreenshotKeybind)),  "Unity KeyCode name for capturing a screenshot (default: F8)." },
 
-                // Ollama Fallback (optional) group
-                { m_Setting.GetOptionGroupLocaleID(Setting.kOllamaGroup), "Ollama Fallback (optional)" },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OllamaFallbackBaseUrl)),  "Base URL" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.OllamaFallbackBaseUrl)),   "Ollama server base URL (default: http://localhost:11434)" },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OllamaFallbackApiKey)),   "API Key" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.OllamaFallbackApiKey)),    "Optional API key for Ollama endpoint" },
-                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OllamaFallbackModel)),    "Model" },
-                { m_Setting.GetOptionDescLocaleID(nameof(Setting.OllamaFallbackModel)),     "Ollama model name (e.g. llama3.1:8b)" },
+                // Ollama group
+                { m_Setting.GetOptionGroupLocaleID(Setting.kOllamaGroup), "Ollama" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OllamaBaseUrl)),  "Base URL" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.OllamaBaseUrl)),   "Ollama server base URL (default: http://localhost:11434)" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OllamaApiKey)),   "API Key" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.OllamaApiKey)),    "Optional API key if your Ollama endpoint requires authentication." },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.OllamaModel)),    "Model" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.OllamaModel)),     "Ollama model name (e.g. llama3.1:8b, mistral, etc.)" },
 
                 // UI group
                 { m_Setting.GetOptionGroupLocaleID(Setting.kUIGroup), "UI Settings" },

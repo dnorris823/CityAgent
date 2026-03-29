@@ -94,10 +94,36 @@ namespace CityAgent.Systems
                 if (m_NarrativeMemory.IsInitialized)
                     sysPrompt += m_NarrativeMemory.GetAlwaysInjectedContext();
 
-                string apiKey = (setting.ClaudeApiKey ?? "").Trim();
-                string model  = (setting.ClaudeModel ?? "").Trim();
+                // Route to selected provider — no cross-provider fallback on wrong provider
+                if (setting.Provider == ProviderChoice.Ollama)
+                {
+                    string ollamaBase  = (setting.OllamaBaseUrl  ?? "").Trim().TrimEnd('/');
+                    string ollamaKey   = (setting.OllamaApiKey   ?? "").Trim();
+                    string ollamaModel = (setting.OllamaModel    ?? "").Trim();
 
-                // Log masked key (first 4 + last 4 chars)
+                    if (string.IsNullOrEmpty(ollamaBase) || string.IsNullOrEmpty(ollamaModel))
+                    {
+                        Interlocked.Exchange(ref PendingResult,
+                            "[Error]: Ollama URL or model not configured. Check mod settings.");
+                        return;
+                    }
+
+                    Mod.Log.Info($"[ClaudeAPISystem] Provider: Ollama, model={ollamaModel}, url={ollamaBase}");
+                    await RunOllamaRequestAsync(userMessage, ollamaKey, ollamaModel, ollamaBase, sysPrompt).ConfigureAwait(false);
+                    return;
+                }
+
+                // Claude primary path
+                string apiKey = (setting.ClaudeApiKey ?? "").Trim();
+                string model  = (setting.ClaudeModel  ?? "").Trim();
+
+                if (string.IsNullOrEmpty(apiKey))
+                {
+                    Interlocked.Exchange(ref PendingResult,
+                        "[Error]: No Claude API key configured. Add your key in mod settings, or switch the provider to Ollama.");
+                    return;
+                }
+
                 string masked = apiKey.Length > 8
                     ? apiKey.Substring(0, 4) + "..." + apiKey.Substring(apiKey.Length - 4)
                     : "(too short)";
@@ -107,24 +133,22 @@ namespace CityAgent.Systems
 
                 if (result == "__429__")
                 {
-                    // D-06 / D-08: Rate limit fallback
-                    string ollamaBase  = (setting.OllamaFallbackBaseUrl ?? "").Trim().TrimEnd('/');
-                    string ollamaModel = (setting.OllamaFallbackModel ?? "").Trim();
+                    // 429 rate-limit fallback to Ollama (only when Claude is primary)
+                    string ollamaBase  = (setting.OllamaBaseUrl  ?? "").Trim().TrimEnd('/');
+                    string ollamaModel = (setting.OllamaModel    ?? "").Trim();
 
                     if (string.IsNullOrEmpty(ollamaBase) || string.IsNullOrEmpty(ollamaModel))
                     {
-                        // D-08: no fallback configured
                         Interlocked.Exchange(ref PendingResult,
-                            "\u26a0\ufe0f Rate limited by Claude. No Ollama fallback configured \u2014 set one up in mod settings.");
+                            "\u26a0\ufe0f Rate limited by Claude. Configure Ollama in mod settings to enable fallback.");
                         return;
                     }
 
-                    // D-06: surface rate-limit notice to chat panel before retrying
                     Interlocked.Exchange(ref PendingResult,
                         $"\u26a0\ufe0f Rate limited \u2014 retrying with {ollamaModel}...");
                     Mod.Log.Info($"[ClaudeAPISystem] Claude 429 \u2014 falling back to Ollama {ollamaModel}");
 
-                    string ollamaKey = (setting.OllamaFallbackApiKey ?? "").Trim();
+                    string ollamaKey = (setting.OllamaApiKey ?? "").Trim();
                     await RunOllamaRequestAsync(userMessage, ollamaKey, ollamaModel, ollamaBase, sysPrompt).ConfigureAwait(false);
                 }
                 // else: PendingResult already set inside RunClaudeRequestAsync (success or non-429 error)
