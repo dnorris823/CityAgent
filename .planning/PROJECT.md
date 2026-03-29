@@ -31,6 +31,7 @@ You ask Claude something about your city, it sees the current screenshot and liv
 
 *What we're building toward for v1 personal use*
 
+- ✓ **Extended city data tools** — `get_budget` (balance, per-zone taxes, expenses, loans), `get_traffic_summary` (flow score, bottlenecks), `get_services_summary` (electricity/water/sewage/health); per-tool toggles in mod settings; system prompt updated with per-tool guidance — validated Phase 3
 - ✓ **Chat UI polish** — 3-way message renderer (user=right blue, assistant=left dark, system=center pill), loading status text rotation, queued-message chip, welcome greeting — validated Phase 2
 - ✓ **Markdown rendering quality** — nested lists, Coherent GT-safe italic regex, fenced code language labels, bold+heading coexistence — validated Phase 2
 - ✓ **Loading / thinking indicator** — bouncing dots + rotating city-flavored status text; `<thinking>` blocks stripped from responses — validated Phase 2
@@ -49,7 +50,7 @@ You ask Claude something about your city, it sees the current screenshot and liv
 
 ## Context
 
-- **Codebase state**: Phase 2 complete. Chat UI polished: 3-way message bubbles, loading status animation, queued-send chip, welcome greeting. Markdown renderer fixed for nested lists, Coherent GT-safe italic, and code language labels. Error strings promoted to `role='system'` in C#; `<thinking>` blocks stripped before display. Remaining planned features: memory file explorer, web search tool, heartbeat system.
+- **Codebase state**: Phase 3 complete. Claude now has access to 13 agent tools: 7 data tools (population, building demand, workforce, zoning, budget, traffic, services) + 6 memory tools. CityDataSystem caches 30+ ECS properties on a 128-frame throttle. All data tools have per-toggle controls in mod settings. Remaining planned features: memory file explorer, web search tool, heartbeat system.
 - **Persona**: Claude shifts roles based on context — narrating events (CityPlannerPlays energy), advising on strategy (urban planning expert), and chronicling the city's ongoing story (historian). The narrative memory system is the foundation of continuity.
 - **Tech environment**: Unity 2022.3.7f1 DOTS/ECS, .NET Standard 2.1 DLL, React/TypeScript in Coherent GT (CS2's embedded Chromium). No npm packages — React, react-dom, and cs2 bindings are runtime-injected externals.
 - **Developer**: Single developer, VSCode (not Visual Studio), working toward personal-use v1.
