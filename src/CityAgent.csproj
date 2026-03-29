@@ -63,6 +63,10 @@
       <HintPath>$(ManagedDir)\Unity.Entities.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Unity.Collections">
+      <HintPath>$(ManagedDir)\Unity.Collections.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="Unity.Mathematics">
       <HintPath>$(ManagedDir)\Unity.Mathematics.dll</HintPath>
       <Private>False</Private>
