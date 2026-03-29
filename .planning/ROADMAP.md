@@ -61,10 +61,10 @@ Plans:
   2. Player asks about traffic and Claude describes current congestion conditions using live ECS data
   3. Player asks about city services and Claude identifies coverage gaps using ECS health, education, and deathcare data
   4. Player can toggle individual data tools on or off in mod settings — disabled tools are not included in any API call
-**Plans:** 3 plans
+**Plans:** 2/3 plans executed
 Plans:
 - [x] 03-01-PLAN.md — CityDataSystem ECS expansion + budget/traffic/services tool implementations
-- [ ] 03-02-PLAN.md — Settings Data Tools toggles + CityToolRegistry filtering + tool registration + system prompt
+- [x] 03-02-PLAN.md — Settings Data Tools toggles + CityToolRegistry filtering + tool registration + system prompt
 - [ ] 03-03-PLAN.md — Build, deploy, and in-game verification of all new tools and toggles
 
 ### Phase 4: Web Search Tool
@@ -121,7 +121,7 @@ Note: Phase 4 depends only on Phase 1 (not Phase 2 or 3) and could execute in pa
 |-------|----------------|--------|-----------|
 | 1. API Migration & Core Stability | 1/4 | In Progress|  |
 | 2. Chat UI Polish | 2/3 | In Progress|  |
-| 3. Extended City Data Tools | 0/3 | Planning complete | - |
+| 3. Extended City Data Tools | 2/3 | In Progress|  |
 | 4. Web Search Tool | 0/2 | Planning complete | - |
 | 5. Memory File Explorer | 0/3 | Planning complete | - |
 | 6. Proactive Heartbeat | 0/3 | Planning complete | - |
