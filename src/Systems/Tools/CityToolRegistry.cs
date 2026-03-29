@@ -32,6 +32,7 @@ namespace CityAgent.Systems.Tools
             bool first = true;
             foreach (var tool in m_Tools.Values)
             {
+                if (!IsToolEnabled(tool.Name)) continue;
                 if (!first) sb.Append(',');
                 first = false;
 
@@ -56,6 +57,7 @@ namespace CityAgent.Systems.Tools
             bool first = true;
             foreach (var tool in m_Tools.Values)
             {
+                if (!IsToolEnabled(tool.Name)) continue;
                 if (!first) sb.Append(',');
                 first = false;
                 sb.Append("{\"type\":\"function\",\"function\":{");
@@ -66,6 +68,28 @@ namespace CityAgent.Systems.Tools
             }
             sb.Append(']');
             return sb.ToString();
+        }
+
+        /// <summary>
+        /// Returns false if the player has disabled this tool in mod settings.
+        /// Memory tools are always enabled (default case returns true).
+        /// </summary>
+        private static bool IsToolEnabled(string toolName)
+        {
+            var s = Mod.ActiveSetting;
+            if (s == null) return true; // safety: settings not loaded yet
+
+            return toolName switch
+            {
+                "get_population"       => s.EnablePopulationTool,
+                "get_building_demand"  => s.EnableBuildingDemandTool,
+                "get_workforce"        => s.EnableWorkforceTool,
+                "get_zoning_summary"   => s.EnableZoningSummaryTool,
+                "get_budget"           => s.EnableBudgetTool,
+                "get_traffic_summary"  => s.EnableTrafficSummaryTool,
+                "get_services_summary" => s.EnableServicesSummaryTool,
+                _                      => true  // memory tools and any future non-data tools
+            };
         }
 
         /// <summary>
