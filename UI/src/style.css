@@ -512,3 +512,80 @@
   border-radius: 3px 3px 0 0;
   margin-bottom: -1px;
 }
+
+/* ── Phase 2: System notice pill (D-01) ──────────────────────────────────── */
+.ca-notice-pill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.2em 0.75em;
+  margin: 0.3em 0;
+  border-radius: 20px;
+  font-size: 0.82em;
+  line-height: 1.3;
+  font-style: normal;
+}
+
+.ca-notice-pill--error {
+  background: rgba(120, 30, 20, 0.2);
+  border: 1px solid rgba(180, 80, 60, 0.4);
+  color: #d4806a;
+}
+
+.ca-notice-pill--warning {
+  background: rgba(100, 75, 15, 0.2);
+  border: 1px solid rgba(160, 120, 40, 0.35);
+  color: #c8a04a;
+}
+
+/* ── Phase 2: Loading status text (D-06) ─────────────────────────────────── */
+.ca-loading-status {
+  display: block;
+  font-size: 0.82em;
+  font-style: italic;
+  color: #8aa4bc;
+  margin-top: 0.4em;
+  line-height: 1.3;
+}
+
+/* ── Phase 2: Queued message chip (D-09) ─────────────────────────────────── */
+.ca-queued-chip {
+  display: flex;
+  align-items: center;
+  background: rgba(30, 60, 100, 0.6);
+  border: 1px solid rgba(74, 158, 222, 0.35);
+  border-radius: 20px;
+  padding: 0.2em 0.7em;
+  font-size: 0.82em;
+  color: #4a9ede;
+  align-self: flex-start;
+  margin-bottom: 0.4em;
+}
+
+.ca-queued-chip button {
+  background: none;
+  border: none;
+  color: #4a9ede;
+  cursor: pointer;
+  font-size: 0.9em;
+  padding: 0;
+  margin-left: 0.4em;
+  line-height: 1;
+}
+
+/* ── Phase 2: Welcome greeting block (D-11) ──────────────────────────────── */
+.ca-welcome {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  text-align: center;
+  color: #8aa4bc;
+  font-size: 0.92em;
+  font-style: italic;
+  line-height: 1.5;
+  padding: 1.5em 1em;
+}
