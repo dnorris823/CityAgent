@@ -589,3 +589,280 @@
   line-height: 1.5;
   padding: 1.5em 1em;
 }
+
+/* ── Phase 5: Memory File Explorer ────────────────────────────── */
+
+/* Tab Bar */
+.ca-tabs {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  min-height: 2.2em;
+  align-items: stretch;
+}
+
+.ca-tabs__tab {
+  flex: 1;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  font-size: 1em;
+  font-weight: 400;
+  color: rgba(160, 180, 200, 0.7);
+  padding: 0.5em 0;
+  transition: color 0.15s, background 0.15s;
+}
+
+.ca-tabs__tab:hover {
+  background: rgba(74, 158, 222, 0.08);
+}
+
+.ca-tabs__tab--active {
+  border-bottom-color: rgba(74, 158, 222, 0.8);
+  color: #4a9ede;
+  font-weight: 600;
+}
+
+/* Sub-header (file view navigation bar) */
+.ca-mem-subheader {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0.5em 0.85em;
+  border-bottom: 1px solid rgba(60, 100, 150, 0.25);
+  background: rgba(14, 26, 42, 0.9);
+  flex-shrink: 0;
+}
+
+.ca-mem-subheader--destructive {
+  background: rgba(140, 20, 20, 0.35);
+  border-color: rgba(180, 40, 40, 0.4);
+}
+
+.ca-mem-subheader__back {
+  background: none;
+  border: none;
+  color: #4a9ede;
+  cursor: pointer;
+  font-size: 1.1em;
+  padding: 0 0.25em;
+  flex-shrink: 0;
+}
+
+.ca-mem-subheader__filename {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+  font-size: 1em;
+  padding: 0 0.5em;
+  color: rgba(224, 232, 240, 0.9);
+}
+
+.ca-mem-subheader__actions {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.ca-mem-subheader__actions .ca-btn-icon {
+  margin-left: 0.25em;
+}
+
+.ca-mem-subheader__error {
+  font-size: 0.8em;
+  color: rgba(255, 100, 100, 0.9);
+  padding-left: 0.4em;
+}
+
+/* File List */
+.ca-mem-list {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 0.4em 0;
+}
+
+.ca-mem-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.ca-mem-list::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.ca-mem-list::-webkit-scrollbar-thumb {
+  background: rgba(74, 158, 222, 0.25);
+  border-radius: 3px;
+}
+
+.ca-mem-list__row {
+  display: flex;
+  align-items: center;
+  padding: 0.55em 0.85em;
+  min-height: 2.8em;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(60, 100, 150, 0.12);
+}
+
+.ca-mem-list__row:hover {
+  background: rgba(22, 38, 58, 0.9);
+}
+
+.ca-mem-list__icon {
+  width: 1.2em;
+  margin-right: 0.4em;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+.ca-mem-list__name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.92em;
+  color: rgba(224, 232, 240, 1);
+}
+
+.ca-mem-list__name--core {
+  color: rgba(200, 215, 230, 0.8);
+}
+
+.ca-mem-list__meta {
+  flex-shrink: 0;
+  font-size: 0.8em;
+  color: rgba(160, 180, 200, 0.6);
+  display: flex;
+  align-items: center;
+  margin-left: 0.5em;
+}
+
+.ca-mem-list__size {
+  white-space: nowrap;
+}
+
+.ca-mem-list__time {
+  white-space: nowrap;
+  margin-left: 0.6em;
+}
+
+.ca-mem-list__empty {
+  padding: 1.5em;
+  text-align: center;
+  color: rgba(160, 180, 200, 0.5);
+  font-size: 0.9em;
+}
+
+/* Core file badge */
+.ca-mem-badge--core {
+  font-size: 0.72em;
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+  background: rgba(60, 100, 150, 0.2);
+  border: 1px solid rgba(60, 100, 150, 0.3);
+  color: rgba(160, 180, 200, 0.6);
+  white-space: nowrap;
+  margin-right: 0.4em;
+  flex-shrink: 0;
+}
+
+/* File Content View */
+.ca-mem-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0.85em;
+  font-family: "Consolas", "Courier New", monospace;
+  font-size: 0.92em;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: rgba(224, 232, 240, 1);
+  background: rgba(8, 16, 28, 0.6);
+}
+
+.ca-mem-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.ca-mem-content::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.ca-mem-content::-webkit-scrollbar-thumb {
+  background: rgba(74, 158, 222, 0.25);
+  border-radius: 3px;
+}
+
+.ca-mem-content--loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(160, 180, 200, 0.5);
+  font-family: inherit;
+  font-size: 0.9em;
+}
+
+/* Edit Textarea */
+.ca-mem-textarea {
+  flex: 1;
+  width: 100%;
+  box-sizing: border-box;
+  resize: none;
+  background: rgba(8, 16, 28, 0.85);
+  color: rgba(224, 232, 240, 1);
+  border: 1px solid rgba(60, 100, 150, 0.3);
+  border-radius: 0;
+  font-family: "Consolas", "Courier New", monospace;
+  font-size: 0.92em;
+  line-height: 1.55;
+  padding: 0.85em;
+  outline: none;
+  overflow-y: auto;
+}
+
+.ca-mem-textarea:focus {
+  border-color: rgba(74, 158, 222, 0.5);
+}
+
+.ca-mem-textarea::-webkit-scrollbar {
+  width: 6px;
+}
+
+.ca-mem-textarea::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.ca-mem-textarea::-webkit-scrollbar-thumb {
+  background: rgba(74, 158, 222, 0.25);
+  border-radius: 3px;
+}
+
+/* Error Notice */
+.ca-mem-error {
+  padding: 0.4em 0.85em;
+  font-size: 0.82em;
+  color: rgba(255, 100, 100, 0.9);
+  background: rgba(140, 20, 20, 0.3);
+  border-bottom: 1px solid rgba(180, 40, 40, 0.3);
+  flex-shrink: 0;
+}
+
+/* Destructive button modifier */
+.ca-btn-icon--destructive {
+  color: rgba(255, 100, 100, 0.85);
+  border-color: rgba(180, 40, 40, 0.35);
+}
+
+.ca-btn-icon--destructive:hover {
+  background: rgba(140, 20, 20, 0.4);
+  color: rgba(255, 176, 176, 1);
+  border-color: rgba(200, 50, 50, 0.5);
+}
