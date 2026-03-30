@@ -1,6 +1,7 @@
 import React, { Component, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { bindValue, useValue, trigger } from "cs2/api";
 import { renderMarkdown } from "../utils/renderMarkdown";
+import { formatRelativeTime } from "../utils/formatRelativeTime";
 
 interface ChatMessage {
   role: "user" | "assistant" | "system";
@@ -10,26 +11,30 @@ interface ChatMessage {
 
 // Lazy-initialize bindings on first component render instead of at module scope.
 // This prevents the module from crashing if cs2/api isn't ready at import time.
-let panelVisible$:  any = null;
-let messagesJson$:  any = null;
-let isLoading$:     any = null;
-let hasScreenshot$: any = null;
-let panelWidth$:    any = null;
-let panelHeight$:   any = null;
-let fontSize$:      any = null;
+let panelVisible$:     any = null;
+let messagesJson$:     any = null;
+let isLoading$:        any = null;
+let hasScreenshot$:    any = null;
+let panelWidth$:       any = null;
+let panelHeight$:      any = null;
+let fontSize$:         any = null;
+let memoryFilesJson$:  any = null;
+let memoryOpResult$:   any = null;
 let bindingsReady = false;
 let bindError: string | null = null;
 
 function ensureBindings() {
   if (bindingsReady) return;
   try {
-    panelVisible$  = bindValue<boolean>("cityAgent", "panelVisible");
-    messagesJson$  = bindValue<string> ("cityAgent", "messagesJson");
-    isLoading$     = bindValue<boolean>("cityAgent", "isLoading");
-    hasScreenshot$ = bindValue<boolean>("cityAgent", "hasScreenshot");
-    panelWidth$    = bindValue<number> ("cityAgent", "panelWidth");
-    panelHeight$   = bindValue<number> ("cityAgent", "panelHeight");
-    fontSize$      = bindValue<number> ("cityAgent", "fontSize");
+    panelVisible$    = bindValue<boolean>("cityAgent", "panelVisible");
+    messagesJson$    = bindValue<string> ("cityAgent", "messagesJson");
+    isLoading$       = bindValue<boolean>("cityAgent", "isLoading");
+    hasScreenshot$   = bindValue<boolean>("cityAgent", "hasScreenshot");
+    panelWidth$      = bindValue<number> ("cityAgent", "panelWidth");
+    panelHeight$     = bindValue<number> ("cityAgent", "panelHeight");
+    fontSize$        = bindValue<number> ("cityAgent", "fontSize");
+    memoryFilesJson$ = bindValue<string> ("cityAgent", "memoryFilesJson");
+    memoryOpResult$  = bindValue<string> ("cityAgent", "memoryOpResult");
     bindingsReady = true;
   } catch (e: any) {
     bindError = e?.message || "Unknown binding error";
@@ -103,13 +108,15 @@ function safeTrigger(group: string, name: string, ...args: any[]) {
 // Inner component — only rendered after bindings are confirmed ready.
 // All hooks live here so they're called unconditionally.
 const CityAgentInner: React.FC = () => {
-  const panelVisible  = useValue(panelVisible$)  as boolean || false;
-  const rawJson       = useValue(messagesJson$)  as string  || "[]";
-  const isLoading     = useValue(isLoading$)     as boolean || false;
-  const hasScreenshot = useValue(hasScreenshot$) as boolean || false;
-  const panelWidth    = (useValue(panelWidth$)   as number) || 520;
-  const panelHeight   = (useValue(panelHeight$)  as number) || 650;
-  const fontSize      = (useValue(fontSize$)     as number) || 14;
+  const panelVisible    = useValue(panelVisible$)    as boolean || false;
+  const rawJson         = useValue(messagesJson$)    as string  || "[]";
+  const isLoading       = useValue(isLoading$)       as boolean || false;
+  const hasScreenshot   = useValue(hasScreenshot$)   as boolean || false;
+  const panelWidth      = (useValue(panelWidth$)     as number) || 520;
+  const panelHeight     = (useValue(panelHeight$)    as number) || 650;
+  const fontSize        = (useValue(fontSize$)       as number) || 14;
+  var memoryFilesRaw    = useValue(memoryFilesJson$) as string  || "[]";
+  var memoryOpResult    = useValue(memoryOpResult$)  as string  || "";
 
   const [inputText, setInputText] = useState("");
   const [dragPos, setDragPos] = useState<{ x: number; y: number } | null>(null);
@@ -142,6 +149,18 @@ const CityAgentInner: React.FC = () => {
     () => WELCOME_GREETINGS[Math.floor(Math.random() * WELCOME_GREETINGS.length)]
   );
 
+  // Phase 5: Tab navigation state
+  var [activeTab, setActiveTab]                     = useState<'advisor' | 'memory'>('advisor');
+  var [memoryView, setMemoryView]                   = useState<'list' | 'file'>('list');
+  var [selectedFile, setSelectedFile]               = useState<string>('');
+  var [selectedFileIsCore, setSelectedFileIsCore]   = useState<boolean>(false);
+  var [isEditing, setIsEditing]                     = useState<boolean>(false);
+  var [editContent, setEditContent]                 = useState<string>('');
+  var [fileContent, setFileContent]                 = useState<string>('');
+  var [isDeleteConfirm, setIsDeleteConfirm]         = useState<boolean>(false);
+  var [memoryError, setMemoryError]                 = useState<string>('');
+  var [awaitingOp, setAwaitingOp]                   = useState<'read' | 'write' | 'delete' | null>(null);
+
   // Reset drag position and local resize when settings-based dimensions change
   const prevBindingDims = useRef({ w: panelWidth, h: panelHeight });
   useEffect(() => {
@@ -163,6 +182,21 @@ const CityAgentInner: React.FC = () => {
     }
     catch { return []; }
   }, [rawJson]);
+
+  // Phase 5: parse and sort memory files
+  var memoryFiles = useMemo(function() {
+    try {
+      var parsed = JSON.parse(memoryFilesRaw);
+      if (!Array.isArray(parsed)) return [];
+      // Sort: core first (alphabetical), then non-core (alphabetical)
+      parsed.sort(function(a: any, b: any) {
+        if (a.is_core && !b.is_core) return -1;
+        if (!a.is_core && b.is_core) return 1;
+        return (a.name || '').localeCompare(b.name || '');
+      });
+      return parsed;
+    } catch (e) { return []; }
+  }, [memoryFilesRaw]);
 
   // Auto-scroll to bottom when messages change.
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -195,6 +229,44 @@ const CityAgentInner: React.FC = () => {
     }
   }, [isLoading]);
 
+  // Phase 5: Handle memoryOpResult changes — dispatch based on awaitingOp
+  useEffect(function() {
+    if (!memoryOpResult || memoryOpResult === "" || awaitingOp === null) return;
+
+    if (awaitingOp === 'read') {
+      setFileContent(memoryOpResult);
+      setAwaitingOp(null);
+    } else if (awaitingOp === 'write') {
+      if (memoryOpResult === "ok" || memoryOpResult.indexOf("Successfully wrote") === 0) {
+        // Save succeeded — switch to view mode, use the content we sent
+        setFileContent(editContent);
+        setIsEditing(false);
+        setMemoryError('');
+      } else {
+        // Save failed — stay in edit mode, show error
+        var errMsg = memoryOpResult.replace(/^\[Error\]:\s*/, '');
+        if (errMsg.length > 120) errMsg = errMsg.substring(0, 120) + '...';
+        setMemoryError('Save failed \u2014 ' + errMsg);
+      }
+      setAwaitingOp(null);
+    } else if (awaitingOp === 'delete') {
+      if (memoryOpResult === "ok" || memoryOpResult.indexOf("Successfully deleted") === 0) {
+        // Delete succeeded — go back to list, refresh
+        setMemoryView('list');
+        setSelectedFile('');
+        setIsDeleteConfirm(false);
+        setMemoryError('');
+        safeTrigger("cityAgent", "refreshMemoryFiles");
+      } else {
+        var delErr = memoryOpResult.replace(/^\[Error\]:\s*/, '');
+        if (delErr.length > 120) delErr = delErr.substring(0, 120) + '...';
+        setMemoryError('Delete failed \u2014 ' + delErr);
+        setIsDeleteConfirm(false);
+      }
+      setAwaitingOp(null);
+    }
+  }, [memoryOpResult]);
+
   const canSend = inputText.trim().length > 0 && (isLoading ? pendingQueuedMsg.current === null : true);
 
   const handleSend = useCallback(() => {
@@ -219,6 +291,78 @@ const CityAgentInner: React.FC = () => {
       handleSend();
     }
   };
+
+  // Phase 5: Tab and memory explorer handlers
+  function handleTabSwitch(tab: 'advisor' | 'memory') {
+    setActiveTab(tab);
+    if (tab === 'memory') {
+      // Reset memory state per D-04
+      setMemoryView('list');
+      setSelectedFile('');
+      setIsEditing(false);
+      setIsDeleteConfirm(false);
+      setMemoryError('');
+      setFileContent('');
+      safeTrigger("cityAgent", "refreshMemoryFiles");
+    }
+  }
+
+  function handleFileClick(file: any) {
+    setSelectedFile(file.name);
+    setSelectedFileIsCore(file.is_core);
+    setMemoryView('file');
+    setIsEditing(false);
+    setIsDeleteConfirm(false);
+    setMemoryError('');
+    setFileContent('');
+    setAwaitingOp('read');
+    safeTrigger("cityAgent", "readMemoryFile", file.name);
+  }
+
+  function handleBackToList() {
+    setMemoryView('list');
+    setSelectedFile('');
+    setIsEditing(false);
+    setIsDeleteConfirm(false);
+    setMemoryError('');
+  }
+
+  function handleEditStart() {
+    setEditContent(fileContent);
+    setIsEditing(true);
+    setMemoryError('');
+  }
+
+  function handleEditCancel() {
+    setIsEditing(false);
+    setMemoryError('');
+  }
+
+  function handleEditSave() {
+    setMemoryError('');
+    setAwaitingOp('write');
+    safeTrigger("cityAgent", "writeMemoryFile", selectedFile, editContent);
+  }
+
+  function handleDeleteStart() {
+    setIsDeleteConfirm(true);
+    setMemoryError('');
+  }
+
+  function handleDeleteCancel() {
+    setIsDeleteConfirm(false);
+  }
+
+  function handleDeleteConfirm() {
+    setMemoryError('');
+    setAwaitingOp('delete');
+    safeTrigger("cityAgent", "deleteMemoryFile", selectedFile);
+  }
+
+  function formatFileSize(sizeKb: number): string {
+    if (sizeKb < 1) return Math.round(sizeKb * 1024) + 'B';
+    return sizeKb.toFixed(1) + 'KB';
+  }
 
   // ── Drag logic ──
   const dragRef = useRef<{ startX: number; startY: number; origX: number; origY: number } | null>(null);
@@ -363,96 +507,197 @@ const CityAgentInner: React.FC = () => {
           <div className="ca-resize-handle ca-resize-handle--top"    onMouseDown={e => handleResizeMouseDown("top", e)} />
 
           <header className="ca-panel__header" onMouseDown={handleHeaderMouseDown}>
-            <span className="ca-panel__header-title">CityAgent AI Advisor</span>
+            <div className="ca-tabs" onMouseDown={stopDragPropagation}>
+              <button
+                className={"ca-tabs__tab" + (activeTab === 'advisor' ? " ca-tabs__tab--active" : "")}
+                onClick={function() { handleTabSwitch('advisor'); }}
+              >Advisor</button>
+              <button
+                className={"ca-tabs__tab" + (activeTab === 'memory' ? " ca-tabs__tab--active" : "")}
+                onClick={function() { handleTabSwitch('memory'); }}
+              >Memory</button>
+            </div>
             <div className="ca-panel__header-actions" onMouseDown={stopDragPropagation}>
-              <button className="ca-btn-icon ca-btn-new-chat" onClick={() => safeTrigger("cityAgent", "clearChat")}>
-                + New Chat
-              </button>
+              {activeTab === 'advisor' && (
+                <button className="ca-btn-icon ca-btn-new-chat" onClick={function() { safeTrigger("cityAgent", "clearChat"); }}>
+                  + New Chat
+                </button>
+              )}
               <button className="ca-btn-icon" onClick={() => safeTrigger("cityAgent", "togglePanel")}>
-                ✕
+                &#x2715;
               </button>
             </div>
           </header>
 
-          <div className="ca-messages" ref={messagesContainerRef}>
-            {messages.map((msg, i) => {
-              if (msg.role === "system") {
-                // System notices render as center pills, not bubbles (D-01)
-                const isError = msg.content.startsWith("[Error]:");
-                const pillClass = isError ? "ca-notice-pill ca-notice-pill--error" : "ca-notice-pill ca-notice-pill--warning";
-                const text = msg.content.replace(/^\[Error\]:\s*/, "");
-                return (
-                  <div key={i} className={pillClass}>
-                    {text}
+          {activeTab === 'advisor' && (
+            <>
+              <div className="ca-messages" ref={messagesContainerRef}>
+                {messages.map((msg, i) => {
+                  if (msg.role === "system") {
+                    // System notices render as center pills, not bubbles (D-01)
+                    const isError = msg.content.startsWith("[Error]:");
+                    const pillClass = isError ? "ca-notice-pill ca-notice-pill--error" : "ca-notice-pill ca-notice-pill--warning";
+                    const text = msg.content.replace(/^\[Error\]:\s*/, "");
+                    return (
+                      <div key={i} className={pillClass}>
+                        {text}
+                      </div>
+                    );
+                  }
+                  return (
+                    <div key={i} className={`ca-bubble ca-bubble--${msg.role}`}>
+                      {msg.hadImage && (
+                        <span className="ca-bubble__image-badge">screenshot attached</span>
+                      )}
+                      {msg.role === "assistant" ? (
+                        <div className="ca-bubble__text ca-markdown" dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.content) }} />
+                      ) : (
+                        <span className="ca-bubble__text">{msg.content}</span>
+                      )}
+                    </div>
+                  );
+                })}
+                {isLoading && (
+                  <div className="ca-bubble ca-bubble--assistant">
+                    <LoadingDots />
+                    <span className="ca-loading-status">{loadingPhrase}</span>
                   </div>
-                );
-              }
-              return (
-                <div key={i} className={`ca-bubble ca-bubble--${msg.role}`}>
-                  {msg.hadImage && (
-                    <span className="ca-bubble__image-badge">screenshot attached</span>
-                  )}
-                  {msg.role === "assistant" ? (
-                    <div className="ca-bubble__text ca-markdown" dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.content) }} />
-                  ) : (
-                    <span className="ca-bubble__text">{msg.content}</span>
-                  )}
-                </div>
-              );
-            })}
-            {isLoading && (
-              <div className="ca-bubble ca-bubble--assistant">
-                <LoadingDots />
-                <span className="ca-loading-status">{loadingPhrase}</span>
+                )}
+                {messages.length === 0 && !isLoading && (
+                  <div className="ca-welcome">{welcomeGreeting}</div>
+                )}
               </div>
-            )}
-            {messages.length === 0 && !isLoading && (
-              <div className="ca-welcome">{welcomeGreeting}</div>
-            )}
-          </div>
 
-          <div className="ca-input-area">
-            {hasScreenshot && (
-              <div className="ca-screenshot-chip">
-                <span>screenshot ready</span>
-                <button onClick={() => safeTrigger("cityAgent", "removeScreenshot")}>✕</button>
+              <div className="ca-input-area">
+                {hasScreenshot && (
+                  <div className="ca-screenshot-chip">
+                    <span>screenshot ready</span>
+                    <button onClick={() => safeTrigger("cityAgent", "removeScreenshot")}>&#x2715;</button>
+                  </div>
+                )}
+                {queuedChipText && (
+                  <div className="ca-queued-chip">
+                    <span>queued: {queuedChipText.length > 40 ? queuedChipText.substring(0, 40) + "..." : queuedChipText}</span>
+                    <button onClick={() => {
+                      pendingQueuedMsg.current = null;
+                      setQueuedChipText(null);
+                    }}>&#x2715;</button>
+                  </div>
+                )}
+                <div className="ca-input-row">
+                  <textarea
+                    className="ca-input"
+                    value={inputText}
+                    onChange={e => setInputText(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder="Ask about your city..."
+                    rows={2}
+                  />
+                  <button
+                    className="ca-screenshot-btn"
+                    onClick={() => safeTrigger("cityAgent", "captureScreenshot")}
+                    disabled={hasScreenshot || isLoading}
+                    title="Capture screenshot"
+                  >
+                    SS
+                  </button>
+                  <button
+                    className="ca-send-btn"
+                    onClick={handleSend}
+                    disabled={!canSend}
+                  >
+                    Send
+                  </button>
+                </div>
               </div>
-            )}
-            {queuedChipText && (
-              <div className="ca-queued-chip">
-                <span>queued: {queuedChipText.length > 40 ? queuedChipText.substring(0, 40) + "..." : queuedChipText}</span>
-                <button onClick={() => {
-                  pendingQueuedMsg.current = null;
-                  setQueuedChipText(null);
-                }}>✕</button>
-              </div>
-            )}
-            <div className="ca-input-row">
-              <textarea
-                className="ca-input"
-                value={inputText}
-                onChange={e => setInputText(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Ask about your city..."
-                rows={2}
-              />
-              <button
-                className="ca-screenshot-btn"
-                onClick={() => safeTrigger("cityAgent", "captureScreenshot")}
-                disabled={hasScreenshot || isLoading}
-                title="Capture screenshot"
-              >
-                SS
-              </button>
-              <button
-                className="ca-send-btn"
-                onClick={handleSend}
-                disabled={!canSend}
-              >
-                Send
-              </button>
+            </>
+          )}
+
+          {activeTab === 'memory' && memoryView === 'list' && (
+            <div className="ca-mem-list">
+              {memoryFiles.length === 0 ? (
+                <div className="ca-mem-list__empty">No memory files found.</div>
+              ) : (
+                memoryFiles.map(function(file: any) {
+                  return (
+                    <div key={file.name} className="ca-mem-list__row" onClick={function() { handleFileClick(file); }}>
+                      <div className="ca-mem-list__icon">
+                        {file.is_core && <span className="ca-mem-badge--core">core</span>}
+                      </div>
+                      <span className={"ca-mem-list__name" + (file.is_core ? " ca-mem-list__name--core" : "")}>
+                        {file.name}
+                      </span>
+                      <div className="ca-mem-list__meta">
+                        <span className="ca-mem-list__size">{formatFileSize(file.size_kb)}</span>
+                        <span className="ca-mem-list__time">{formatRelativeTime(file.last_modified_unix)}</span>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
             </div>
-          </div>
+          )}
+
+          {activeTab === 'memory' && memoryView === 'file' && (
+            <>
+              {/* Sub-header */}
+              <div className={"ca-mem-subheader" + (isDeleteConfirm ? " ca-mem-subheader--destructive" : "")}
+                   onMouseDown={stopDragPropagation}>
+                {isDeleteConfirm ? (
+                  <>
+                    <span className="ca-mem-subheader__filename">Delete {selectedFile}?</span>
+                    {memoryError && <span className="ca-mem-subheader__error">{memoryError}</span>}
+                    <div className="ca-mem-subheader__actions">
+                      <button className="ca-btn-icon ca-btn-icon--destructive" onClick={handleDeleteConfirm}>Yes</button>
+                      <button className="ca-btn-icon" onClick={handleDeleteCancel}>Discard Changes</button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <button className="ca-mem-subheader__back" onClick={handleBackToList}>{'\u2190'}</button>
+                    <span className="ca-mem-subheader__filename">{selectedFile}</span>
+                    {memoryError && !isEditing && <span className="ca-mem-subheader__error">{memoryError}</span>}
+                    <div className="ca-mem-subheader__actions">
+                      {isEditing ? (
+                        <>
+                          <button className="ca-btn-icon" onClick={handleEditSave}>Save Changes</button>
+                          <button className="ca-btn-icon" onClick={handleEditCancel}>Discard Changes</button>
+                        </>
+                      ) : (
+                        <>
+                          <button className="ca-btn-icon" onClick={handleEditStart}>Edit</button>
+                          {!selectedFileIsCore && (
+                            <button className="ca-btn-icon" onClick={handleDeleteStart}>Delete</button>
+                          )}
+                          {selectedFileIsCore && <span className="ca-mem-badge--core">core</span>}
+                        </>
+                      )}
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Error notice for save failures (above textarea) */}
+              {isEditing && memoryError && (
+                <div className="ca-mem-error">{memoryError}</div>
+              )}
+
+              {/* Content area */}
+              {isEditing ? (
+                <textarea
+                  className="ca-mem-textarea"
+                  value={editContent}
+                  onChange={function(e: any) { setEditContent(e.target.value); }}
+                />
+              ) : (
+                fileContent === '' && awaitingOp === 'read' ? (
+                  <div className="ca-mem-content ca-mem-content--loading">Loading...</div>
+                ) : (
+                  <div className="ca-mem-content">{fileContent}</div>
+                )
+              )}
+            </>
+          )}
         </div>
       )}
     </>
