@@ -75,9 +75,9 @@ Plans:
   1. Player asks a question about real urban planning (e.g., "how do cities reduce highway noise?") and Claude's response cites or references external sources retrieved via search
   2. Brave Search API key is configurable in mod settings as a separate field from the Anthropic API key
   3. Claude decides autonomously when to invoke web search — the player does not need to trigger it explicitly
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 Plans:
-- [ ] 04-01-PLAN.md — Settings Web Search section + SearchWebTool implementation
+- [x] 04-01-PLAN.md — Settings Web Search section + SearchWebTool implementation
 - [ ] 04-02-PLAN.md — Tool registration wiring + system prompt extension + in-game verification
 
 ### Phase 5: Memory File Explorer
@@ -122,6 +122,6 @@ Note: Phase 4 depends only on Phase 1 (not Phase 2 or 3) and could execute in pa
 | 1. API Migration & Core Stability | 1/4 | In Progress|  |
 | 2. Chat UI Polish | 2/3 | In Progress|  |
 | 3. Extended City Data Tools | 2/3 | In Progress|  |
-| 4. Web Search Tool | 0/2 | Planning complete | - |
+| 4. Web Search Tool | 1/2 | In Progress|  |
 | 5. Memory File Explorer | 0/3 | Planning complete | - |
 | 6. Proactive Heartbeat | 0/3 | Planning complete | - |

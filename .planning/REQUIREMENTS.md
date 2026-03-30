@@ -34,8 +34,8 @@
 
 ### Web Search
 
-- [ ] **SRCH-01**: `search_web(query)` agent tool calls Brave Search API from C# backend and returns relevant results to Claude
-- [ ] **SRCH-02**: Brave Search API key is configurable in mod settings (separate field from Anthropic API key)
+- [x] **SRCH-01**: `search_web(query)` agent tool calls Brave Search API from C# backend and returns relevant results to Claude
+- [x] **SRCH-02**: Brave Search API key is configurable in mod settings (separate field from Anthropic API key)
 - [ ] **SRCH-03**: Claude automatically uses web search when answering questions about real-world urban planning — system prompt instructs when to search
 
 ### Memory File Explorer
@@ -104,8 +104,8 @@
 | DATA-03 | Phase 3 | Complete |
 | DATA-04 | Phase 3 | Complete |
 | DATA-05 | Phase 3 | Complete |
-| SRCH-01 | Phase 4 | Pending |
-| SRCH-02 | Phase 4 | Pending |
+| SRCH-01 | Phase 4 | Complete |
+| SRCH-02 | Phase 4 | Complete |
 | SRCH-03 | Phase 4 | Pending |
 | MEM-01 | Phase 5 | Pending |
 | MEM-02 | Phase 5 | Pending |
