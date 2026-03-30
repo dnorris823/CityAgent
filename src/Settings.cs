@@ -11,17 +11,18 @@ namespace CityAgent
     public enum ProviderChoice { Claude, Ollama }
 
     [FileLocation(nameof(CityAgent))]
-    [SettingsUIGroupOrder(kProviderGroup, kClaudeGroup, kOllamaGroup, kUIGroup, kMemoryGroup, kDataToolsGroup)]
-    [SettingsUIShowGroupName(kProviderGroup, kClaudeGroup, kOllamaGroup, kUIGroup, kMemoryGroup, kDataToolsGroup)]
+    [SettingsUIGroupOrder(kProviderGroup, kClaudeGroup, kOllamaGroup, kUIGroup, kMemoryGroup, kDataToolsGroup, kWebSearchGroup)]
+    [SettingsUIShowGroupName(kProviderGroup, kClaudeGroup, kOllamaGroup, kUIGroup, kMemoryGroup, kDataToolsGroup, kWebSearchGroup)]
     public class Setting : ModSetting
     {
-        public const string kSection       = "Main";
-        public const string kProviderGroup = "Provider";
-        public const string kClaudeGroup   = "Claude";
-        public const string kOllamaGroup   = "Ollama";
-        public const string kUIGroup       = "UI";
+        public const string kSection        = "Main";
+        public const string kProviderGroup  = "Provider";
+        public const string kClaudeGroup    = "Claude";
+        public const string kOllamaGroup    = "Ollama";
+        public const string kUIGroup        = "UI";
         public const string kMemoryGroup    = "Memory";
         public const string kDataToolsGroup = "DataTools";
+        public const string kWebSearchGroup = "WebSearch";
 
         private const string DefaultSystemPrompt =
             "You are CityAgent, an AI city planning advisor in the style of CityPlannerPlays. " +
@@ -138,6 +139,15 @@ namespace CityAgent
         [SettingsUISection(kSection, kDataToolsGroup)]
         public bool EnableServicesSummaryTool { get; set; } = true;
 
+        // --- Web Search section ---
+
+        [SettingsUISection(kSection, kWebSearchGroup)]
+        [SettingsUITextInput]
+        public string BraveSearchApiKey { get; set; } = string.Empty;
+
+        [SettingsUISection(kSection, kWebSearchGroup)]
+        public bool WebSearchEnabled { get; set; } = false;
+
         public override void SetDefaults()
         {
             Provider               = ProviderChoice.Ollama;
@@ -160,6 +170,8 @@ namespace CityAgent
             EnableBudgetTool          = true;
             EnableTrafficSummaryTool  = true;
             EnableServicesSummaryTool = true;
+            BraveSearchApiKey         = string.Empty;
+            WebSearchEnabled          = false;
         }
     }
 
@@ -237,6 +249,13 @@ namespace CityAgent
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.EnableTrafficSummaryTool)),   "Include traffic flow and congestion data tool in AI requests." },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.EnableServicesSummaryTool)), "City Services" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.EnableServicesSummaryTool)),  "Include electricity, water, sewage, and health data tool in AI requests." },
+
+                // Web Search group
+                { m_Setting.GetOptionGroupLocaleID(Setting.kWebSearchGroup),                    "Web Search" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.BraveSearchApiKey)),          "Brave Search API Key" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.BraveSearchApiKey)),           "Your Brave Search API key for web search. Get one free at api-dashboard.search.brave.com." },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.WebSearchEnabled)),           "Enable Web Search" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.WebSearchEnabled)),            "Allow the AI advisor to search the web for real-world urban planning information." },
             };
         }
 
