@@ -38,7 +38,11 @@ namespace CityAgent
             "- get_traffic_summary: Call when discussing traffic, congestion, road networks, or commute quality.\n" +
             "- get_services_summary: Call when discussing utilities (power, water, sewage) or public health.\n\n" +
             "Always call relevant tools before answering questions about these topics. " +
-            "Combine tool data with the screenshot for comprehensive analysis.";
+            "Combine tool data with the screenshot for comprehensive analysis.\n\n" +
+            "You also have access to web search. Use search_web() to look up real-world urban " +
+            "planning techniques, zoning practices, infrastructure design (roads, transit, utilities), " +
+            "and historical city examples or case studies. When using search results, reference the " +
+            "source title and URL in your response so the player can explore further.";
 
         public Setting(IMod mod) : base(mod) { }
 
