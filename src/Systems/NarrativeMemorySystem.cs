@@ -119,6 +119,52 @@ namespace CityAgent.Systems
             Mod.Log.Info($"[NarrativeMemorySystem] New session started: #{m_SessionNumber}");
         }
 
+        /// <summary>
+        /// Call each frame after Initialize() when the city slug resolved to the fallback
+        /// ("unnamed-city"). Attempts to read the real city name from CityConfigurationSystem.
+        /// If a real name is found, switches the active city directory and re-scaffolds.
+        /// Returns: 1  = upgraded (slug changed — caller should reload chat history)
+        ///          0  = already resolved (no change needed)
+        ///         -1  = still waiting (retry next frame)
+        /// </summary>
+        public int TryUpgradeCityName()
+        {
+            if (!m_Initialized) return -1;
+
+            // Already resolved to a real name on initial init — nothing to do.
+            if (m_CitySlug != "unnamed-city") return 0;
+
+            try
+            {
+                var cityConfigSystem = World.GetExistingSystemManaged<Game.City.CityConfigurationSystem>();
+                if (cityConfigSystem == null) return -1;
+
+                string cityName = cityConfigSystem.cityName;
+                if (string.IsNullOrWhiteSpace(cityName)) return -1;
+
+                string newSlug = GenerateSlug(cityName);
+                if (newSlug == "unnamed-city") return -1;
+
+                // We have a real city name now — switch directories.
+                m_CityName = cityName.Trim();
+                m_CitySlug = newSlug;
+                m_CityDir  = Path.Combine(m_MemoryBase, m_CitySlug);
+
+                Mod.Log.Info($"[NarrativeMemorySystem] City name resolved late: \"{m_CityName}\" slug: \"{m_CitySlug}\"");
+
+                EnsureDirectoryStructure();
+                m_SessionNumber = DetermineNextSessionNumber();
+
+                Mod.Log.Info($"[NarrativeMemorySystem] Switched to city directory. Session #{m_SessionNumber}");
+                return 1;
+            }
+            catch (Exception ex)
+            {
+                Mod.Log.Warn($"[NarrativeMemorySystem] TryUpgradeCityName failed: {ex.Message}");
+                return -1;
+            }
+        }
+
         private string ResolveCityName(string? cityNameOverride)
         {
             if (!string.IsNullOrWhiteSpace(cityNameOverride))

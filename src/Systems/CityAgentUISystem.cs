@@ -36,6 +36,7 @@ namespace CityAgent.Systems
         private int m_ScreenshotWaitFrames = -1; // -1 = not waiting
         private int m_SettingsPollCounter = 0;
         private bool m_MemoryInitialized = false;
+        private bool m_CityNameResolved  = false;  // true once slug is confirmed non-fallback
 
         protected override void OnCreate()
         {
@@ -113,6 +114,49 @@ namespace CityAgent.Systems
             else if (!m_MemoryInitialized && m_NarrativeMemory.IsInitialized)
             {
                 m_MemoryInitialized = true;
+            }
+
+            // 0b. If memory initialized but city slug is still the fallback ("unnamed-city"),
+            //     keep retrying until CityConfigurationSystem has the real city name populated.
+            //     TryUpgradeCityName returns: 1 = just upgraded, 0 = already real, -1 = still waiting.
+            if (m_MemoryInitialized && !m_CityNameResolved)
+            {
+                int upgradeResult = m_NarrativeMemory.TryUpgradeCityName();
+                if (upgradeResult == 0)
+                {
+                    // Slug was already correct on initial init — no history reload needed.
+                    // Still force a CityData refresh so tool values reflect this city.
+                    m_CityNameResolved = true;
+                    m_CityData.InvalidateCache();
+                    Mod.Log.Info("[CityAgentUISystem] City name confirmed on first frame — refreshing city data cache.");
+                }
+                else if (upgradeResult == 1)
+                {
+                    // Slug just changed from "unnamed-city" to the real city slug.
+                    // Discard any history that was loaded from the wrong directory and
+                    // reload from the correct city directory.
+                    m_CityNameResolved = true;
+                    m_CityData.InvalidateCache();
+                    Mod.Log.Info("[CityAgentUISystem] City name resolved late — refreshing city data cache.");
+                    m_History.Clear();
+                    try
+                    {
+                        var lastSession = m_NarrativeMemory.LoadLatestChatSession();
+                        if (lastSession != null)
+                        {
+                            var restored = NarrativeMemorySystem.ParseChatSession(lastSession);
+                            foreach (var (role, content, hadImage) in restored)
+                                m_History.Add(new ChatMessage { role = role, content = content, hadImage = hadImage });
+                        }
+                        PushMessagesBinding();
+                        Mod.Log.Info($"[CityAgentUISystem] Reloaded {m_History.Count} messages from correct city directory.");
+                    }
+                    catch (Exception ex)
+                    {
+                        Mod.Log.Error($"[CityAgentUISystem] Failed to reload session after city name upgrade: {ex.Message}");
+                    }
+                }
+                // upgradeResult == -1: still waiting — try again next frame
             }
 
             // 1. Screenshot keybind

@@ -30,19 +30,25 @@ namespace CityAgent.Systems
         public int IndustrialDemand  { get; private set; }   // industrialBuildingDemand, 0–100
         public int OfficeDemand      { get; private set; }   // officeBuildingDemand, 0–100
 
-        // Budget properties
+        // Budget properties — totals from ICityStatisticsSystem (matches game HUD)
         public bool  BudgetAvailable     { get; private set; }
         public int   Balance             { get; private set; }
         public int   TotalIncome         { get; private set; }
         public int   TotalExpenses       { get; private set; }
+        // Per-category income from ICityServiceBudgetSystem
         public int   TaxResidential      { get; private set; }
         public int   TaxCommercial       { get; private set; }
         public int   TaxIndustrial       { get; private set; }
         public int   TaxOffice           { get; private set; }
+        public int   ServiceFees         { get; private set; }  // healthcare+elec+edu+parking+transit+garbage+water fees
+        public int   GovernmentSubsidy   { get; private set; }
+        public int   ExportRevenue       { get; private set; }  // electricity+water exports
+        // Per-category expenses
         public int   ServiceUpkeep       { get; private set; }
         public int   LoanInterestExpense { get; private set; }
         public int   MapTileUpkeep       { get; private set; }
-        public int   ImportCosts         { get; private set; }
+        public int   ImportCosts         { get; private set; }  // electricity+water imports, sewage export
+        public int   ImportSvcCosts      { get; private set; }  // police/ambulance/hearse/fire/garbage imports
         public int   Subsidies           { get; private set; }
 
         // Loan properties
@@ -67,6 +73,32 @@ namespace CityAgent.Systems
         public int SewageFulfilled  { get; private set; }
         public int SickCitizenCount { get; private set; }
 
+        // ── Cache invalidation ───────────────────────────────────────────────────────
+
+        private volatile bool m_ForceUpdate = false;
+
+        // Stabilization state: after city load, re-read every 64 frames until count is
+        // non-zero and stable for 2 consecutive reads, then revert to the 128-frame throttle.
+        private int m_StabilizingCyclesLeft = 0;
+        private int m_StabilizingFrameCounter = 0;
+        private int m_LastStablePopulation = -1;
+        private int m_StableReadCount = 0;
+
+        /// <summary>
+        /// Forces the next OnUpdate cycle to bypass the 128-frame throttle and re-read all
+        /// ECS values immediately. Also enters a short stabilization period (up to 8 reads,
+        /// 64 frames apart) until the citizen count is non-zero and stable across 2 reads.
+        /// Call this when a new city is detected (e.g., after city name resolves).
+        /// </summary>
+        public void InvalidateCache()
+        {
+            m_ForceUpdate = true;
+            m_StabilizingCyclesLeft  = 8;   // up to 8 extra re-reads after the forced one
+            m_StabilizingFrameCounter = 0;
+            m_LastStablePopulation   = -1;
+            m_StableReadCount        = 0;
+        }
+
         // ── ECS queries ──────────────────────────────────────────────────────────────
 
         private EntityQuery m_CitizenQuery;
@@ -84,9 +116,18 @@ namespace CityAgent.Systems
         private CommercialDemandSystem  m_CommercialDemandSystem  = null!;
         private IndustrialDemandSystem  m_IndustrialDemandSystem  = null!;
 
-        // ── Budget / services system refs ─────────────────────────────────────────────
+        // ── Statistics / budget / services system refs ────────────────────────────────
 
-        private GameSystemBase m_BudgetSystem      = null!;
+        // CityStatisticsSystem computes pre-aggregated city-wide totals (same source as the
+        // game's own HUD). Use this to read population and household count rather than counting
+        // raw Citizen/Household entities — entity queries can under-count because citizens
+        // temporarily carry additional components (e.g., TravelPurpose) while active.
+        private GameSystemBase m_CityStatisticsSystem = null!;
+
+        // Stored already cast so we know at init time which class actually implements the interface.
+        // We try ServiceBudgetUISystem (UI layer) first, then CityServiceBudgetSystem (simulation
+        // layer) as fallback — one of the two is the real implementor depending on CS2 version.
+        private ICityServiceBudgetSystem? m_Budget = null;
         private GameSystemBase m_LoanSystem        = null!;
         private GameSystemBase m_ElectricitySystem = null!;
         private GameSystemBase m_WaterSystem       = null!;
@@ -152,7 +193,14 @@ namespace CityAgent.Systems
             m_CommercialDemandSystem  = World.GetOrCreateSystemManaged<CommercialDemandSystem>();
             m_IndustrialDemandSystem  = World.GetOrCreateSystemManaged<IndustrialDemandSystem>();
 
-            m_BudgetSystem      = World.GetOrCreateSystemManaged<ServiceBudgetUISystem>();
+            m_CityStatisticsSystem = World.GetOrCreateSystemManaged<CityStatisticsSystem>();
+
+            // Determine which budget system actually implements ICityServiceBudgetSystem.
+            // Try the UI layer first; fall back to the simulation layer.
+            m_Budget = World.GetOrCreateSystemManaged<ServiceBudgetUISystem>() as ICityServiceBudgetSystem
+                    ?? World.GetOrCreateSystemManaged<CityServiceBudgetSystem>() as ICityServiceBudgetSystem;
+            Mod.Log.Info($"[CityDataSystem] Budget system resolved: {(m_Budget != null ? m_Budget.GetType().Name : "none")}");
+
             m_LoanSystem        = World.GetOrCreateSystemManaged<LoanSystem>();
             m_ElectricitySystem = World.GetOrCreateSystemManaged<ElectricityStatisticsSystem>();
             m_WaterSystem       = World.GetOrCreateSystemManaged<WaterStatisticsSystem>();
@@ -162,13 +210,81 @@ namespace CityAgent.Systems
 
         protected override void OnUpdate()
         {
-            // Throttle: update roughly every 4 real seconds (128 frames at ~30 fps)
-            if (m_SimulationSystem.frameIndex % 128 != 77) return;
+            // Throttle: update roughly every 4 real seconds (128 frames at ~30 fps).
+            // Exception 1: bypass the throttle if InvalidateCache() was called (e.g., on city load).
+            // Exception 2: if in stabilization mode (after a force-invalidation), re-read every 64
+            //   frames until the citizen count is non-zero and stable for 2 consecutive reads.
+            bool forceThisFrame = m_ForceUpdate;
+            if (forceThisFrame)
+            {
+                m_ForceUpdate = false;
+                Mod.Log.Info("[CityDataSystem] Cache invalidated — forcing immediate refresh.");
+            }
+            else if (m_StabilizingCyclesLeft > 0)
+            {
+                // Stabilization mode: fire every 64 frames until stable
+                m_StabilizingFrameCounter++;
+                if (m_StabilizingFrameCounter < 64)
+                    return;
+                m_StabilizingFrameCounter = 0;
+                m_StabilizingCyclesLeft--;
+                Mod.Log.Info($"[CityDataSystem] Stabilizing re-read (cycles left: {m_StabilizingCyclesLeft}).");
+            }
+            else if (m_SimulationSystem.frameIndex % 128 != 77)
+            {
+                return;
+            }
 
-            TotalPopulation  = m_CitizenQuery.CalculateEntityCount();
-            TotalHouseholds  = m_HouseholdQuery.CalculateEntityCount();
-            TotalEmployed    = m_EmployeeQuery.CalculateEntityCount();
-            TotalWorkplaces  = m_WorkProviderQuery.CalculateEntityCount();
+            // Read population and household count from CityStatisticsSystem — the same
+            // pre-aggregated source the game's HUD uses. Raw Citizen entity counts are
+            // unreliable because a large fraction of citizens carry TravelPurpose at any
+            // frame (going to work, school, shopping…), and any None-filter on that component
+            // would under-count severely.
+            var cityStats = m_CityStatisticsSystem as ICityStatisticsSystem;
+            if (cityStats != null)
+            {
+                TotalPopulation = cityStats.GetStatisticValue(StatisticType.Population, 0);
+                TotalHouseholds = cityStats.GetStatisticValue(StatisticType.HouseholdCount, 0);
+                // Income/expense totals from the statistics system match the game's own HUD/economy
+                // panel, which aggregates across all budget subsystems (service budget, trade, etc.).
+                TotalIncome   = cityStats.GetStatisticValue(StatisticType.Income, 0);
+                TotalExpenses = cityStats.GetStatisticValue(StatisticType.Expense, 0);
+                Balance       = cityStats.GetStatisticValue(StatisticType.Money, 0);
+                BudgetAvailable = true;
+            }
+            else
+            {
+                // Fallback: raw entity count (may under-count — see comment above)
+                TotalPopulation = m_CitizenQuery.CalculateEntityCount();
+                TotalHouseholds = m_HouseholdQuery.CalculateEntityCount();
+            }
+
+            TotalEmployed   = m_EmployeeQuery.CalculateEntityCount();
+            TotalWorkplaces = m_WorkProviderQuery.CalculateEntityCount();
+
+            // Diagnostic: log counts on every refresh so they can be compared against
+            // the in-game UI population counter. Remove once values are confirmed correct.
+            Mod.Log.Info($"[CityDataSystem] DIAG — population={TotalPopulation} households={TotalHouseholds} employed={TotalEmployed} workplaces={TotalWorkplaces} statsOk={cityStats != null} budgetOk={m_Budget != null} stabilizing={m_StabilizingCyclesLeft > 0}");
+
+            // Stabilization check: if in stabilizing mode, exit early once population is
+            // non-zero and matches the previous read (i.e., the city is fully streamed in).
+            if (m_StabilizingCyclesLeft > 0 && TotalPopulation > 0)
+            {
+                if (TotalPopulation == m_LastStablePopulation)
+                {
+                    m_StableReadCount++;
+                    if (m_StableReadCount >= 2)
+                    {
+                        m_StabilizingCyclesLeft = 0;
+                        Mod.Log.Info($"[CityDataSystem] Population stabilized at {TotalPopulation} — exiting stabilization mode.");
+                    }
+                }
+                else
+                {
+                    m_StableReadCount = 0;
+                }
+                m_LastStablePopulation = TotalPopulation;
+            }
 
             // ResidentialDemandSystem.buildingDemand is int3 (low/medium/high density demand).
             // Use .x (low density) as the primary residential demand signal.
@@ -183,31 +299,41 @@ namespace CityAgent.Systems
 
             // ── Budget ────────────────────────────────────────────────────────────────
 
-            var budget = m_BudgetSystem as ICityServiceBudgetSystem;
-            if (budget != null)
+            // Per-category breakdown from ICityServiceBudgetSystem.
+            // Totals (TotalIncome/TotalExpenses/Balance) come from ICityStatisticsSystem above
+            // because GetTotalIncome() only covers the service budget subsystem; the statistics
+            // system aggregates all budget subsystems and matches the game's economy panel.
+            if (m_Budget != null)
             {
-                BudgetAvailable     = true;
-                Balance             = budget.GetBalance();
-                TotalIncome         = budget.GetTotalIncome();
-                TotalExpenses       = budget.GetTotalExpenses();
-                TaxResidential      = budget.GetIncome(IncomeSource.TaxResidential);
-                TaxCommercial       = budget.GetIncome(IncomeSource.TaxCommercial);
-                TaxIndustrial       = budget.GetIncome(IncomeSource.TaxIndustrial);
-                TaxOffice           = budget.GetIncome(IncomeSource.TaxOffice);
-                ServiceUpkeep       = budget.GetExpense(ExpenseSource.ServiceUpkeep);
-                LoanInterestExpense = budget.GetExpense(ExpenseSource.LoanInterest);
-                MapTileUpkeep       = budget.GetExpense(ExpenseSource.MapTileUpkeep);
-                ImportCosts         = budget.GetExpense(ExpenseSource.ImportElectricity)
-                                    + budget.GetExpense(ExpenseSource.ImportWater)
-                                    + budget.GetExpense(ExpenseSource.ExportSewage);
-                Subsidies           = budget.GetExpense(ExpenseSource.SubsidyResidential)
-                                    + budget.GetExpense(ExpenseSource.SubsidyCommercial)
-                                    + budget.GetExpense(ExpenseSource.SubsidyIndustrial)
-                                    + budget.GetExpense(ExpenseSource.SubsidyOffice);
-            }
-            else
-            {
-                BudgetAvailable = false;
+                TaxResidential   = m_Budget.GetIncome(IncomeSource.TaxResidential);
+                TaxCommercial    = m_Budget.GetIncome(IncomeSource.TaxCommercial);
+                TaxIndustrial    = m_Budget.GetIncome(IncomeSource.TaxIndustrial);
+                TaxOffice        = m_Budget.GetIncome(IncomeSource.TaxOffice);
+                ServiceFees      = m_Budget.GetIncome(IncomeSource.FeeHealthcare)
+                                 + m_Budget.GetIncome(IncomeSource.FeeElectricity)
+                                 + m_Budget.GetIncome(IncomeSource.FeeEducation)
+                                 + m_Budget.GetIncome(IncomeSource.FeeParking)
+                                 + m_Budget.GetIncome(IncomeSource.FeePublicTransport)
+                                 + m_Budget.GetIncome(IncomeSource.FeeGarbage)
+                                 + m_Budget.GetIncome(IncomeSource.FeeWater);
+                GovernmentSubsidy = m_Budget.GetIncome(IncomeSource.GovernmentSubsidy);
+                ExportRevenue    = m_Budget.GetIncome(IncomeSource.ExportElectricity)
+                                 + m_Budget.GetIncome(IncomeSource.ExportWater);
+                ServiceUpkeep    = m_Budget.GetExpense(ExpenseSource.ServiceUpkeep);
+                LoanInterestExpense = m_Budget.GetExpense(ExpenseSource.LoanInterest);
+                MapTileUpkeep    = m_Budget.GetExpense(ExpenseSource.MapTileUpkeep);
+                ImportCosts      = m_Budget.GetExpense(ExpenseSource.ImportElectricity)
+                                 + m_Budget.GetExpense(ExpenseSource.ImportWater)
+                                 + m_Budget.GetExpense(ExpenseSource.ExportSewage);
+                ImportSvcCosts   = m_Budget.GetExpense(ExpenseSource.ImportPoliceService)
+                                 + m_Budget.GetExpense(ExpenseSource.ImportAmbulanceService)
+                                 + m_Budget.GetExpense(ExpenseSource.ImportHearseService)
+                                 + m_Budget.GetExpense(ExpenseSource.ImportFireEngineService)
+                                 + m_Budget.GetExpense(ExpenseSource.ImportGarbageService);
+                Subsidies        = m_Budget.GetExpense(ExpenseSource.SubsidyResidential)
+                                 + m_Budget.GetExpense(ExpenseSource.SubsidyCommercial)
+                                 + m_Budget.GetExpense(ExpenseSource.SubsidyIndustrial)
+                                 + m_Budget.GetExpense(ExpenseSource.SubsidyOffice);
             }
 
             // ── Loans ─────────────────────────────────────────────────────────────────
