@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 03-extended-city-data-tools-02-PLAN.md
-last_updated: "2026-03-29T18:54:00.711Z"
+stopped_at: Completed 04-web-search-tool-01-PLAN.md
+last_updated: "2026-03-30T19:15:51.951Z"
 last_activity: 2026-03-29
 progress:
   total_phases: 6
   completed_phases: 3
   total_plans: 18
-  completed_plans: 10
+  completed_plans: 11
   percent: 11
 ---
 
@@ -59,6 +59,7 @@ Progress: [█░░░░░░░░░] 11%
 | Phase 02-chat-ui-polish P03 | 8 | 2 tasks | 2 files |
 | Phase 02-chat-ui-polish P02 | 8m | 2 tasks | 2 files |
 | Phase 03-extended-city-data-tools P02 | 13min | 2 tasks | 3 files |
+| Phase 04-web-search-tool P01 | 2min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -86,6 +87,8 @@ Recent decisions affecting current work:
 - [Phase 02-chat-ui-polish]: Store queued message in useRef not useState to prevent double-send on re-render during isLoading transition
 - [Phase 03-extended-city-data-tools]: Toggle filter at serialization boundary only (GetToolsJson/GetToolsJsonOpenAI) — Dispatch() not filtered so disabled tools still execute if called directly
 - [Phase 03-extended-city-data-tools]: DefaultSystemPrompt updated in Settings.cs (user-overridable setting) not hardcoded in ClaudeAPISystem; multi-line tool guidance uses C# \n escape sequences
+- [Phase 04-web-search-tool]: WebSearchEnabled defaults to false (explicit opt-in — user must configure Brave key before enabling)
+- [Phase 04-web-search-tool]: SearchWebTool owns separate s_BraveHttp HttpClient to avoid coupling to ClaudeAPISystem.s_Http
 
 ### Pending Todos
 
@@ -98,6 +101,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-29T18:33:00.230Z
-Stopped at: Completed 03-extended-city-data-tools-02-PLAN.md
+Last session: 2026-03-30T19:15:51.947Z
+Stopped at: Completed 04-web-search-tool-01-PLAN.md
 Resume file: None
