@@ -36,7 +36,7 @@ You ask Claude something about your city, it sees the current screenshot and liv
 - ✓ **Markdown rendering quality** — nested lists, Coherent GT-safe italic regex, fenced code language labels, bold+heading coexistence — validated Phase 2
 - ✓ **Loading / thinking indicator** — bouncing dots + rotating city-flavored status text; `<thinking>` blocks stripped from responses — validated Phase 2
 - [ ] **Memory file explorer** — in-panel file system view: browse the per-city narrative memory tree, view/edit/delete individual files
-- [ ] **Web search tool** — `search_web(query)` agent tool backed by Brave/Bing Search API; API key configurable in mod settings; Claude uses it to ground recommendations in real urban planning sources
+- ✓ **Web search tool** — `search_web(query)` agent tool backed by Brave Search API; API key + enable toggle in mod settings; Claude cites sources in responses — validated Phase 4
 - [ ] **Proactive heartbeat system** — Claude periodically checks city stats in the background and surfaces noteworthy events, anomalies, or suggestions; interval and behavior configurable
 - ✓ **Claude API format** — `ClaudeAPISystem` sends correct `/v1/messages` format; explicit provider toggle (Claude API / Ollama) in settings — validated Phase 1
 - ✓ **End-to-end validated** — full build → deploy → in-game cycle approved at human-verify checkpoint — validated Phase 1
@@ -50,7 +50,7 @@ You ask Claude something about your city, it sees the current screenshot and liv
 
 ## Context
 
-- **Codebase state**: Phase 3 complete. Claude now has access to 13 agent tools: 7 data tools (population, building demand, workforce, zoning, budget, traffic, services) + 6 memory tools. CityDataSystem caches 30+ ECS properties on a 128-frame throttle. All data tools have per-toggle controls in mod settings. Remaining planned features: memory file explorer, web search tool, heartbeat system.
+- **Codebase state**: Phase 4 complete. Claude now has access to 14 agent tools: 7 data tools + 6 memory tools + 1 web search tool (Brave Search API, conditional on settings). CityDataSystem caches 30+ ECS properties on a 128-frame throttle. All data tools have per-toggle controls in mod settings. Remaining planned features: memory file explorer, heartbeat system.
 - **Persona**: Claude shifts roles based on context — narrating events (CityPlannerPlays energy), advising on strategy (urban planning expert), and chronicling the city's ongoing story (historian). The narrative memory system is the foundation of continuity.
 - **Tech environment**: Unity 2022.3.7f1 DOTS/ECS, .NET Standard 2.1 DLL, React/TypeScript in Coherent GT (CS2's embedded Chromium). No npm packages — React, react-dom, and cs2 bindings are runtime-injected externals.
 - **Developer**: Single developer, VSCode (not Visual Studio), working toward personal-use v1.
@@ -93,4 +93,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-29 after Phase 1 completion*
+*Last updated: 2026-03-30 after Phase 4 completion*
