@@ -521,14 +521,63 @@ last_updated: ""{now}""
                 string name = info.Name;
                 files.Add(new
                 {
-                    filename      = name,
-                    size_bytes    = info.Length,
-                    last_modified = info.LastWriteTimeUtc.ToString("o", CultureInfo.InvariantCulture),
-                    is_core       = CoreFiles.Contains(name)
+                    name               = name,
+                    size_kb            = Math.Round(info.Length / 1024.0, 1),
+                    is_core            = CoreFiles.Contains(name),
+                    last_modified_unix = new DateTimeOffset(info.LastWriteTimeUtc).ToUnixTimeSeconds()
                 });
             }
 
             return JsonConvert.SerializeObject(files, Formatting.Indented);
+        }
+
+        /// <summary>Synchronously overwrite a memory file with new content (for UI thread use).</summary>
+        public string WriteFile(string filename, string content)
+        {
+            if (!m_Initialized) return "[Error]: Memory system not initialized.";
+            if (!ValidateFilename(filename, out string error)) return error;
+
+            string path = Path.Combine(m_CityDir, filename);
+            if (!File.Exists(path))
+                return $"[Error]: File '{filename}' does not exist. Use create_memory_file to create new files.";
+
+            try
+            {
+                File.WriteAllText(path, content);
+                Mod.Log.Info($"[NarrativeMemorySystem] Wrote {content.Length} chars to {filename}");
+                return $"Successfully wrote {content.Length} characters to {filename}.";
+            }
+            catch (Exception ex)
+            {
+                Mod.Log.Error($"[NarrativeMemorySystem] WriteFile failed for {filename}: {ex.Message}");
+                return $"[Error]: Failed to write {filename}: {ex.Message}";
+            }
+        }
+
+        /// <summary>Synchronously delete a dynamically-created memory file (for UI thread use).</summary>
+        public string DeleteFile(string filename)
+        {
+            if (!m_Initialized) return "[Error]: Memory system not initialized.";
+            if (!ValidateFilename(filename, out string error)) return error;
+
+            if (CoreFiles.Contains(filename))
+                return $"[Error]: '{filename}' is a core memory file and cannot be deleted.";
+
+            string path = Path.Combine(m_CityDir, filename);
+            if (!File.Exists(path))
+                return $"[Error]: File '{filename}' does not exist.";
+
+            try
+            {
+                File.Delete(path);
+                Mod.Log.Info($"[NarrativeMemorySystem] Deleted file: {filename}");
+                return $"Successfully deleted {filename}.";
+            }
+            catch (Exception ex)
+            {
+                Mod.Log.Error($"[NarrativeMemorySystem] DeleteFile failed for {filename}: {ex.Message}");
+                return $"[Error]: Failed to delete {filename}: {ex.Message}";
+            }
         }
 
         // ── Context Injection ───────────────────────────────────────────────────────
