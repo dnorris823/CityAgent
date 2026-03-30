@@ -36,14 +36,14 @@
 
 - [x] **SRCH-01**: `search_web(query)` agent tool calls Brave Search API from C# backend and returns relevant results to Claude
 - [x] **SRCH-02**: Brave Search API key is configurable in mod settings (separate field from Anthropic API key)
-- [ ] **SRCH-03**: Claude automatically uses web search when answering questions about real-world urban planning — system prompt instructs when to search
+- [x] **SRCH-03**: Claude automatically uses web search when answering questions about real-world urban planning — system prompt instructs when to search
 
 ### Memory File Explorer
 
-- [ ] **MEM-01**: In-panel file tree view displays all per-city narrative memory files organized by directory
-- [ ] **MEM-02**: User can click any file in the tree to view its full contents in the panel
-- [ ] **MEM-03**: User can edit file contents directly in the panel and save changes back to disk
-- [ ] **MEM-04**: User can delete non-protected memory files from the panel (protected core files are read-only)
+- [x] **MEM-01**: In-panel file tree view displays all per-city narrative memory files organized by directory
+- [x] **MEM-02**: User can click any file in the tree to view its full contents in the panel
+- [x] **MEM-03**: User can edit file contents directly in the panel and save changes back to disk
+- [x] **MEM-04**: User can delete non-protected memory files from the panel (protected core files are read-only)
 
 ### Proactive Heartbeat
 
@@ -106,11 +106,11 @@
 | DATA-05 | Phase 3 | Complete |
 | SRCH-01 | Phase 4 | Complete |
 | SRCH-02 | Phase 4 | Complete |
-| SRCH-03 | Phase 4 | Pending |
-| MEM-01 | Phase 5 | Pending |
-| MEM-02 | Phase 5 | Pending |
-| MEM-03 | Phase 5 | Pending |
-| MEM-04 | Phase 5 | Pending |
+| SRCH-03 | Phase 4 | Complete |
+| MEM-01 | Phase 5 | Complete |
+| MEM-02 | Phase 5 | Complete |
+| MEM-03 | Phase 5 | Complete |
+| MEM-04 | Phase 5 | Complete |
 | HB-01 | Phase 6 | Pending |
 | HB-02 | Phase 6 | Pending |
 | HB-03 | Phase 6 | Pending |

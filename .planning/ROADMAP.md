@@ -91,8 +91,8 @@ Plans:
   4. Player attempts to delete a protected core file and is prevented — a clear message explains it is read-only
 **Plans:** 3 plans
 Plans:
-- [ ] 05-01-PLAN.md — C# backend: ListFiles() field extension + memory explorer bindings and triggers
-- [ ] 05-02-PLAN.md — React UI: tab navigation, file list, file viewer, edit mode, delete confirmation, CSS
+- [x] 05-01-PLAN.md — C# backend: ListFiles() field extension + memory explorer bindings and triggers
+- [x] 05-02-PLAN.md — React UI: tab navigation, file list, file viewer, edit mode, delete confirmation, CSS
 - [ ] 05-03-PLAN.md — Full build + in-game verification checkpoint
 
 ### Phase 6: Proactive Heartbeat
