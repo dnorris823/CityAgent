@@ -5,7 +5,7 @@ milestone_name: milestone
 status: executing
 stopped_at: Completed 04-web-search-tool-01-PLAN.md
 last_updated: "2026-03-30T19:15:51.951Z"
-last_activity: 2026-03-29
+last_activity: 2026-03-30 -- Phase 04 execution started
 progress:
   total_phases: 6
   completed_phases: 3
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-26)
 
 **Core value:** You ask Claude something about your city, it sees the current screenshot and live stats, and responds with narrative commentary that remembers where the city has been — in a polished chat panel that feels like it belongs in the game.
-**Current focus:** Phase 03 — extended-city-data-tools
+**Current focus:** Phase 04 — web-search-tool
 
 ## Current Position
 
-Phase: 04
-Plan: Not started
-Status: Ready to execute
-Last activity: 2026-03-29
+Phase: 04 (web-search-tool) — EXECUTING
+Plan: 1 of 2
+Status: Executing Phase 04
+Last activity: 2026-03-30 -- Phase 04 execution started
 
 Progress: [█░░░░░░░░░] 11%
 

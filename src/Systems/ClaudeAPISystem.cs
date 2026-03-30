@@ -50,6 +50,20 @@ namespace CityAgent.Systems
             m_ToolRegistry.Register(new DeleteMemoryFileTool(m_NarrativeMemory));
             m_ToolRegistry.Register(new ListMemoryFilesTool(m_NarrativeMemory));
 
+            // Web search tool (conditional on settings)
+            var setting = Mod.ActiveSetting;
+            if (setting != null
+                && setting.WebSearchEnabled
+                && !string.IsNullOrWhiteSpace(setting.BraveSearchApiKey))
+            {
+                m_ToolRegistry.Register(new SearchWebTool(setting));
+                Mod.Log.Info("[ClaudeAPISystem] search_web tool registered.");
+            }
+            else
+            {
+                Mod.Log.Info("[ClaudeAPISystem] search_web tool NOT registered (disabled or no API key).");
+            }
+
             Mod.Log.Info($"Tool registry initialised with {m_ToolRegistry.ToolCount} tools.");
         }
 

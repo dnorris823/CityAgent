@@ -99,7 +99,20 @@
       "Bash(cat \"/c/Coding Projects/CityAgent/Working/CityAgent/.planning/phases/03-extended-city-data-tools/\"*\"-VERIFICATION.md\")",
       "Bash(node \"$HOME/.claude/get-shit-done/bin/gsd-tools.cjs\" phase complete \"03\")",
       "Bash(node \"$HOME/.claude/get-shit-done/bin/gsd-tools.cjs\" commit \"docs\\(phase-03\\): complete phase execution\" --files \".planning/ROADMAP.md\" \".planning/STATE.md\" \".planning/phases/03-extended-city-data-tools/03-VERIFICATION.md\")",
-      "Bash(node \"$HOME/.claude/get-shit-done/bin/gsd-tools.cjs\" commit \"docs\\(phase-03\\): evolve PROJECT.md after phase completion\" --files \".planning/PROJECT.md\")"
+      "Bash(node \"$HOME/.claude/get-shit-done/bin/gsd-tools.cjs\" commit \"docs\\(phase-03\\): evolve PROJECT.md after phase completion\" --files \".planning/PROJECT.md\")",
+      "Skill(gsd:debug)",
+      "Bash(CS2_INSTALL_PATH=\"C:/Program Files \\(x86\\)/Steam/steamapps/common/Cities Skylines II\" dotnet build -c Release)",
+      "Bash(echo \"CS2_INSTALL_PATH=$CS2_INSTALL_PATH\")",
+      "Read(//c/Program Files \\(x86\\)/Steam/steamapps/common/Cities Skylines II/Cities2_Data/Managed/**)",
+      "Bash($env:CS2_INSTALL_PATH = \"C:\\\\Program Files \\(x86\\)\\\\Steam\\\\steamapps\\\\common\\\\Cities Skylines II\")",
+      "Bash(dotnet build:*)",
+      "Bash(ls \"C:/Program Files \\(x86\\)/Steam/steamapps/common/Cities Skylines II/Cities2_Data/Managed/Game.dll\")",
+      "Read(//c/Coding Projects/CityAgent/Working/CityAgent/src/LocalLow/Colossal Order/Cities Skylines II/**)",
+      "Read(//c/Coding Projects/CityAgent/Working/CityAgent/src/LocalLow/Colossal Order/Cities Skylines II/Mods/**)",
+      "Bash(powershell -NoProfile -Command \":*)",
+      "Bash(CS2_INSTALL_PATH=\"C:/Program Files \\(x86\\)/Steam/steamapps/common/Cities Skylines II\")",
+      "Bash(export CS2_INSTALL_PATH)",
+      "Bash(powershell -Command \"\n\\\\$cs2 = 'C:/Program Files \\(x86\\)/Steam/steamapps/common/Cities Skylines II/Cities2_Data/Managed'\n@\\('UnityEngine.CoreModule','Unity.Entities','Unity.Mathematics','Unity.Collections','Colossal.Core','Game'\\) | ForEach-Object { [System.Reflection.Assembly]::LoadFrom\\(\\\\\"\\\\$cs2/\\\\$_.dll\\\\\"\\) } 2>\\\\$null | Out-Null\n\\\\$t = [System.AppDomain]::CurrentDomain.GetAssemblies\\(\\) | ForEach-Object { try { \\\\$_.GetType\\('Game.City.StatisticType'\\) } catch {} } | Where-Object { \\\\$_ }\nif \\(\\\\$t\\) { [System.Enum]::GetNames\\(\\\\$t\\) | Select-String -Pattern 'Income|Expense|Budget|Tax|Revenue|Balance|Money|Net' } else { 'StatisticType not found' }\n\")"
     ]
   }
 }
