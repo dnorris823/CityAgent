@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 04-web-search-tool-01-PLAN.md
-last_updated: "2026-03-30T19:15:51.951Z"
-last_activity: 2026-03-30 -- Phase 04 execution started
+stopped_at: Completed 04-web-search-tool-02-PLAN.md (awaiting human-verify checkpoint)
+last_updated: "2026-03-30T19:20:18.323Z"
+last_activity: 2026-03-30
 progress:
   total_phases: 6
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 18
-  completed_plans: 11
+  completed_plans: 12
   percent: 11
 ---
 
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-03-26)
 ## Current Position
 
 Phase: 04 (web-search-tool) — EXECUTING
-Plan: 1 of 2
-Status: Executing Phase 04
-Last activity: 2026-03-30 -- Phase 04 execution started
+Plan: 2 of 2
+Status: Ready to execute
+Last activity: 2026-03-30
 
 Progress: [█░░░░░░░░░] 11%
 
@@ -60,6 +60,7 @@ Progress: [█░░░░░░░░░] 11%
 | Phase 02-chat-ui-polish P02 | 8m | 2 tasks | 2 files |
 | Phase 03-extended-city-data-tools P02 | 13min | 2 tasks | 3 files |
 | Phase 04-web-search-tool P01 | 2min | 2 tasks | 2 files |
+| Phase 04-web-search-tool P02 | 5min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -89,6 +90,8 @@ Recent decisions affecting current work:
 - [Phase 03-extended-city-data-tools]: DefaultSystemPrompt updated in Settings.cs (user-overridable setting) not hardcoded in ClaudeAPISystem; multi-line tool guidance uses C# \n escape sequences
 - [Phase 04-web-search-tool]: WebSearchEnabled defaults to false (explicit opt-in — user must configure Brave key before enabling)
 - [Phase 04-web-search-tool]: SearchWebTool owns separate s_BraveHttp HttpClient to avoid coupling to ClaudeAPISystem.s_Http
+- [Phase 04-web-search-tool]: Registration at OnCreate() time — user must restart game session after adding Brave key (same pattern as Claude API key)
+- [Phase 04-web-search-tool]: Web search paragraph appended to DefaultSystemPrompt — not dynamically injected at request time (D-14)
 
 ### Pending Todos
 
@@ -101,6 +104,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-30T19:15:51.947Z
-Stopped at: Completed 04-web-search-tool-01-PLAN.md
+Last session: 2026-03-30T19:20:18.320Z
+Stopped at: Completed 04-web-search-tool-02-PLAN.md (awaiting human-verify checkpoint)
 Resume file: None

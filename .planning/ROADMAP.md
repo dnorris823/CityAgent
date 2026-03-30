@@ -78,7 +78,7 @@ Plans:
 **Plans:** 1/2 plans executed
 Plans:
 - [x] 04-01-PLAN.md — Settings Web Search section + SearchWebTool implementation
-- [ ] 04-02-PLAN.md — Tool registration wiring + system prompt extension + in-game verification
+- [x] 04-02-PLAN.md — Tool registration wiring + system prompt extension + in-game verification
 
 ### Phase 5: Memory File Explorer
 **Goal**: Players can browse, read, edit, and delete the per-city narrative memory files directly from the in-game panel
