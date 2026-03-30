@@ -15,13 +15,15 @@ namespace CityAgent.Systems
     {
         private const string kGroup = "cityAgent";
 
-        private ValueBinding<bool>   m_PanelVisible  = null!;
-        private ValueBinding<string> m_MessagesJson  = null!;
-        private ValueBinding<bool>   m_IsLoading     = null!;
-        private ValueBinding<bool>   m_HasScreenshot = null!;
-        private ValueBinding<int>    m_PanelWidth    = null!;
-        private ValueBinding<int>    m_PanelHeight   = null!;
-        private ValueBinding<int>    m_FontSize      = null!;
+        private ValueBinding<bool>   m_PanelVisible    = null!;
+        private ValueBinding<string> m_MessagesJson    = null!;
+        private ValueBinding<bool>   m_IsLoading       = null!;
+        private ValueBinding<bool>   m_HasScreenshot   = null!;
+        private ValueBinding<int>    m_PanelWidth      = null!;
+        private ValueBinding<int>    m_PanelHeight     = null!;
+        private ValueBinding<int>    m_FontSize        = null!;
+        private ValueBinding<string> m_MemoryFilesJson = null!;
+        private ValueBinding<string> m_MemoryOpResult  = null!;
 
         private CityDataSystem        m_CityData       = null!;
         private ClaudeAPISystem       m_ClaudeAPI      = null!;
@@ -60,11 +62,22 @@ namespace CityAgent.Systems
             AddBinding(m_PanelHeight);
             AddBinding(m_FontSize);
 
+            m_MemoryFilesJson = new ValueBinding<string>(kGroup, "memoryFilesJson", "[]");
+            m_MemoryOpResult  = new ValueBinding<string>(kGroup, "memoryOpResult",  "");
+
+            AddBinding(m_MemoryFilesJson);
+            AddBinding(m_MemoryOpResult);
+
             AddBinding(new TriggerBinding        (kGroup, "togglePanel",      TogglePanel));
             AddBinding(new TriggerBinding<string>(kGroup, "sendMessage",      OnSendMessage));
             AddBinding(new TriggerBinding        (kGroup, "clearChat",        OnClearChat));
             AddBinding(new TriggerBinding        (kGroup, "removeScreenshot", OnRemoveScreenshot));
             AddBinding(new TriggerBinding        (kGroup, "captureScreenshot", CaptureScreenshot));
+
+            AddBinding(new TriggerBinding               (kGroup, "refreshMemoryFiles", OnRefreshMemoryFiles));
+            AddBinding(new TriggerBinding<string>       (kGroup, "readMemoryFile",     OnReadMemoryFile));
+            AddBinding(new TriggerBinding<string, string>(kGroup, "writeMemoryFile",   OnWriteMemoryFile));
+            AddBinding(new TriggerBinding<string>       (kGroup, "deleteMemoryFile",   OnDeleteMemoryFile));
 
             m_CityData        = World.GetOrCreateSystemManaged<CityDataSystem>();
             m_ClaudeAPI       = World.GetOrCreateSystemManaged<ClaudeAPISystem>();
@@ -272,6 +285,33 @@ namespace CityAgent.Systems
             {
                 Mod.Log.Error($"Failed to persist chat session: {ex.Message}");
             }
+        }
+
+        private void OnRefreshMemoryFiles()
+        {
+            string json = m_NarrativeMemory.ListFiles();
+            m_MemoryFilesJson.Update(json);
+        }
+
+        private void OnReadMemoryFile(string filename)
+        {
+            m_MemoryOpResult.Update("");  // Reset before operation (loading state)
+            string content = m_NarrativeMemory.ReadFile(filename);
+            m_MemoryOpResult.Update(content);
+        }
+
+        private void OnWriteMemoryFile(string filename, string content)
+        {
+            m_MemoryOpResult.Update("");  // Reset before operation
+            string result = m_NarrativeMemory.WriteFile(filename, content);
+            m_MemoryOpResult.Update(result);
+        }
+
+        private void OnDeleteMemoryFile(string filename)
+        {
+            m_MemoryOpResult.Update("");  // Reset before operation
+            string result = m_NarrativeMemory.DeleteFile(filename);
+            m_MemoryOpResult.Update(result);
         }
 
         private class ChatMessage
