@@ -89,7 +89,15 @@ Appended a web search guidance paragraph to the existing Phase 3 `DefaultSystemP
 
 ## Known Stubs
 
-None — all acceptance criteria met. Task 3 (human checkpoint) requires in-game verification by the user.
+None.
+
+## Human Verification (Task 3 Checkpoint)
+
+**Status:** Approved (2026-03-29)
+
+Verified in-game:
+- Web Search section visible in mod settings with BraveSearchApiKey field and WebSearchEnabled toggle
+- Claude invoked search_web autonomously and cited sources in response
 
 ## Self-Check: PASSED
 
