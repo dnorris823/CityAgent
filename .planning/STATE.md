@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: verifying
-stopped_at: Completed 06-01-PLAN.md — heartbeat settings and system registration
-last_updated: "2026-03-30T00:12:00.000Z"
-last_activity: 2026-03-30
+stopped_at: Completed 06-02-PLAN.md — HeartbeatSystem implementation
+last_updated: "2026-03-31T04:20:17.000Z"
+last_activity: 2026-03-31
 progress:
   total_phases: 6
   completed_phases: 5
   total_plans: 18
-  completed_plans: 16
-  percent: 89
+  completed_plans: 17
+  percent: 94
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-03-26)
 ## Current Position
 
 Phase: 06-proactive-heartbeat
-Plan: 01 complete, 02 next
-Status: In progress — Plan 01 done
-Last activity: 2026-03-30
+Plan: 02 complete, 03 next
+Status: In progress — Plan 02 done
+Last activity: 2026-03-31
 
-Progress: [█░░░░░░░░░] 11%
+Progress: [██░░░░░░░░] 17%
 
 ## Performance Metrics
 
@@ -66,6 +66,7 @@ Progress: [█░░░░░░░░░] 11%
 | Phase 05 P05-02 | 20min | 2 tasks | 3 files |
 | Phase 05 P05-03 | 10min | 2 tasks | 1 files |
 | Phase 06 P06-01 | 12min | 2 tasks | 2 files |
+| Phase 06 P06-02 | 18min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -107,6 +108,9 @@ Recent decisions affecting current work:
 - [Phase 06-01]: HeartbeatIncludeScreenshot defaults to false — screenshots add API cost for background checks; player opts in explicitly
 - [Phase 06-01]: DefaultHeartbeatSystemPrompt uses [silent] sentinel for AI silence gating so CityAgentUISystem can suppress non-events without parsing response
 - [Phase 06-01]: HeartbeatEnabled defaults to false — no heartbeat fires on fresh install; player must opt in
+- [Phase 06-02]: HeartbeatSystem uses Ollama /v1/chat/completions (OpenAI-compatible) not native /api/chat — mirrors ClaudeAPISystem.RunOllamaRequestAsync pattern
+- [Phase 06-02]: PendingHeartbeatResult is a field (not property) to support Interlocked.Exchange(ref ...) per D-14
+- [Phase 06-02]: One-cycle screenshot delay in heartbeat: read prior cycle file, queue new capture — ScreenCapture writes at end of frame
 
 ### Pending Todos
 
@@ -119,6 +123,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-31T04:02:45.045Z
-Stopped at: Completed 06-01-PLAN.md — heartbeat settings and HeartbeatSystem scheduling
+Last session: 2026-03-31T04:20:17.000Z
+Stopped at: Completed 06-02-PLAN.md — HeartbeatSystem implementation
 Resume file: None
