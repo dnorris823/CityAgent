@@ -62,6 +62,10 @@ namespace CityAgent
 
             // Schedule narrative memory system and pass the mod directory
             updateSystem.UpdateAt<Systems.NarrativeMemorySystem>(SystemUpdatePhase.GameSimulation);
+
+            // Schedule heartbeat system for background periodic advisor checks
+            updateSystem.UpdateAt<Systems.HeartbeatSystem>(SystemUpdatePhase.GameSimulation);
+
             if (!string.IsNullOrEmpty(modDir))
             {
                 var memorySystem = updateSystem.World.GetOrCreateSystemManaged<Systems.NarrativeMemorySystem>();

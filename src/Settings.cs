@@ -11,8 +11,8 @@ namespace CityAgent
     public enum ProviderChoice { Claude, Ollama }
 
     [FileLocation(nameof(CityAgent))]
-    [SettingsUIGroupOrder(kProviderGroup, kClaudeGroup, kOllamaGroup, kUIGroup, kMemoryGroup, kDataToolsGroup, kWebSearchGroup)]
-    [SettingsUIShowGroupName(kProviderGroup, kClaudeGroup, kOllamaGroup, kUIGroup, kMemoryGroup, kDataToolsGroup, kWebSearchGroup)]
+    [SettingsUIGroupOrder(kProviderGroup, kClaudeGroup, kOllamaGroup, kUIGroup, kMemoryGroup, kDataToolsGroup, kWebSearchGroup, kHeartbeatGroup)]
+    [SettingsUIShowGroupName(kProviderGroup, kClaudeGroup, kOllamaGroup, kUIGroup, kMemoryGroup, kDataToolsGroup, kWebSearchGroup, kHeartbeatGroup)]
     public class Setting : ModSetting
     {
         public const string kSection        = "Main";
@@ -23,6 +23,7 @@ namespace CityAgent
         public const string kMemoryGroup    = "Memory";
         public const string kDataToolsGroup = "DataTools";
         public const string kWebSearchGroup = "WebSearch";
+        public const string kHeartbeatGroup  = "Heartbeat";
 
         private const string DefaultSystemPrompt =
             "You are CityAgent, an AI city planning advisor in the style of CityPlannerPlays. " +
@@ -43,6 +44,13 @@ namespace CityAgent
             "planning techniques, zoning practices, infrastructure design (roads, transit, utilities), " +
             "and historical city examples or case studies. When using search results, reference the " +
             "source title and URL in your response so the player can explore further.";
+
+        private const string DefaultHeartbeatSystemPrompt =
+            "You are CityAgent, observing this city silently in the background. " +
+            "Analyze the current city data and — if something is genuinely noteworthy — " +
+            "surface one brief observation in the style of CityPlannerPlays: engaging, specific, and actionable. " +
+            "Focus on meaningful trends, emerging problems, or opportunities the player might not have noticed. " +
+            "If nothing warrants attention right now, respond with exactly: [silent]";
 
         public Setting(IMod mod) : base(mod) { }
 
@@ -152,6 +160,22 @@ namespace CityAgent
         [SettingsUISection(kSection, kWebSearchGroup)]
         public bool WebSearchEnabled { get; set; } = false;
 
+        // --- Heartbeat section ---
+
+        [SettingsUISection(kSection, kHeartbeatGroup)]
+        public bool HeartbeatEnabled { get; set; } = false;
+
+        [SettingsUISection(kSection, kHeartbeatGroup)]
+        [SettingsUISlider(min = 1, max = 60, step = 1)]
+        public int HeartbeatIntervalMinutes { get; set; } = 5;
+
+        [SettingsUISection(kSection, kHeartbeatGroup)]
+        public bool HeartbeatIncludeScreenshot { get; set; } = false;
+
+        [SettingsUISection(kSection, kHeartbeatGroup)]
+        [SettingsUITextInput]
+        public string HeartbeatSystemPrompt { get; set; } = DefaultHeartbeatSystemPrompt;
+
         public override void SetDefaults()
         {
             Provider               = ProviderChoice.Ollama;
@@ -176,6 +200,10 @@ namespace CityAgent
             EnableServicesSummaryTool = true;
             BraveSearchApiKey         = string.Empty;
             WebSearchEnabled          = false;
+            HeartbeatEnabled           = false;
+            HeartbeatIntervalMinutes   = 5;
+            HeartbeatIncludeScreenshot = false;
+            HeartbeatSystemPrompt      = DefaultHeartbeatSystemPrompt;
         }
     }
 
@@ -260,6 +288,17 @@ namespace CityAgent
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.BraveSearchApiKey)),           "Your Brave Search API key for web search. Get one free at api-dashboard.search.brave.com." },
                 { m_Setting.GetOptionLabelLocaleID(nameof(Setting.WebSearchEnabled)),           "Enable Web Search" },
                 { m_Setting.GetOptionDescLocaleID(nameof(Setting.WebSearchEnabled)),            "Allow the AI advisor to search the web for real-world urban planning information." },
+
+                // Heartbeat group
+                { m_Setting.GetOptionGroupLocaleID(Setting.kHeartbeatGroup),                        "Heartbeat" },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.HeartbeatEnabled)),               "Enable Heartbeat" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.HeartbeatEnabled)),                "When enabled, the advisor periodically observes the city and surfaces notable events." },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.HeartbeatIntervalMinutes)),       "Heartbeat Interval (minutes)" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.HeartbeatIntervalMinutes)),        "How often the advisor checks the city (1-60 minutes). Lower values use more API calls." },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.HeartbeatIncludeScreenshot)),     "Include Screenshot" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.HeartbeatIncludeScreenshot)),      "Send a city screenshot with each heartbeat check. Richer observations but higher API cost." },
+                { m_Setting.GetOptionLabelLocaleID(nameof(Setting.HeartbeatSystemPrompt)),          "Heartbeat System Prompt" },
+                { m_Setting.GetOptionDescLocaleID(nameof(Setting.HeartbeatSystemPrompt)),           "Instructions for the advisor's background observations. Controls what it looks for and how it responds." },
             };
         }
 
