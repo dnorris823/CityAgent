@@ -40,6 +40,12 @@ namespace CityAgent.Systems
         private bool m_MemoryInitialized = false;
         private bool m_CityNameResolved  = false;  // true once slug is confirmed non-fallback
 
+        /// <summary>
+        /// True when a user-triggered screenshot capture is in progress (D-07).
+        /// HeartbeatSystem reads this on the game thread to avoid capture conflicts.
+        /// </summary>
+        public bool IsScreenshotCapturePending => m_ScreenshotWaitFrames >= 0;
+
         protected override void OnCreate()
         {
             base.OnCreate();
