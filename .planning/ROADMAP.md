@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 2: Chat UI Polish** - Distinct message bubbles, correct markdown rendering, and a loading indicator — polish the panel before adding new content surfaces
 - [ ] **Phase 3: Extended City Data Tools** - Add budget, traffic, and services ECS tools; expose per-tool enable/disable toggles to give the advisor richer structured context
 - [x] **Phase 4: Web Search Tool** - Brave Search API integration as an agent tool; lets Claude ground recommendations in real urban planning sources (completed 2026-03-30)
-- [ ] **Phase 5: Memory File Explorer** - In-panel file tree for browsing, viewing, editing, and deleting per-city narrative memory files
+- [x] **Phase 5: Memory File Explorer** - In-panel file tree for browsing, viewing, editing, and deleting per-city narrative memory files (completed 2026-03-30)
 - [ ] **Phase 6: Proactive Heartbeat** - Background periodic advisor check: surfaces noteworthy city events without the player asking
 
 ## Phase Details
@@ -93,7 +93,7 @@ Plans:
 Plans:
 - [x] 05-01-PLAN.md — C# backend: ListFiles() field extension + memory explorer bindings and triggers
 - [x] 05-02-PLAN.md — React UI: tab navigation, file list, file viewer, edit mode, delete confirmation, CSS
-- [ ] 05-03-PLAN.md — Full build + in-game verification checkpoint
+- [x] 05-03-PLAN.md — Full build + in-game verification checkpoint
 
 ### Phase 6: Proactive Heartbeat
 **Goal**: The advisor surfaces noteworthy city events in the background — without the player having to ask
@@ -123,5 +123,5 @@ Note: Phase 4 depends only on Phase 1 (not Phase 2 or 3) and could execute in pa
 | 2. Chat UI Polish | 2/3 | In Progress|  |
 | 3. Extended City Data Tools | 2/3 | In Progress|  |
 | 4. Web Search Tool | 2/2 | Complete   | 2026-03-30 |
-| 5. Memory File Explorer | 0/3 | Planning complete | - |
+| 5. Memory File Explorer | 3/3 | Complete   | 2026-03-30 |
 | 6. Proactive Heartbeat | 0/3 | Planning complete | - |
