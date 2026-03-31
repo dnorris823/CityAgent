@@ -596,9 +596,10 @@
 .ca-tabs {
   display: flex;
   flex-direction: row;
-  width: 100%;
+  flex: 1;
   min-height: 2.2em;
   align-items: stretch;
+  min-width: 0;
 }
 
 .ca-tabs__tab {
@@ -715,7 +716,7 @@
 }
 
 .ca-mem-list__icon {
-  width: 1.2em;
+  min-width: 3.5em;
   margin-right: 0.4em;
   flex-shrink: 0;
   display: flex;
