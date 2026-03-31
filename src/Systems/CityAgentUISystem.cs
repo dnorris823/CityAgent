@@ -25,9 +25,10 @@ namespace CityAgent.Systems
         private ValueBinding<string> m_MemoryFilesJson = null!;
         private ValueBinding<string> m_MemoryOpResult  = null!;
 
-        private CityDataSystem        m_CityData       = null!;
-        private ClaudeAPISystem       m_ClaudeAPI      = null!;
+        private CityDataSystem        m_CityData        = null!;
+        private ClaudeAPISystem       m_ClaudeAPI       = null!;
         private NarrativeMemorySystem m_NarrativeMemory = null!;
+        private HeartbeatSystem       m_HeartbeatSystem = null!;
 
         private readonly List<ChatMessage> m_History = new List<ChatMessage>();
         private string? m_PendingBase64Image = null;
@@ -89,6 +90,7 @@ namespace CityAgent.Systems
             m_CityData        = World.GetOrCreateSystemManaged<CityDataSystem>();
             m_ClaudeAPI       = World.GetOrCreateSystemManaged<ClaudeAPISystem>();
             m_NarrativeMemory = World.GetOrCreateSystemManaged<NarrativeMemorySystem>();
+            m_HeartbeatSystem = World.GetOrCreateSystemManaged<HeartbeatSystem>();
 
             // Parse keybind from settings
             if (setting != null && Enum.TryParse<KeyCode>(setting.ScreenshotKeybind, out var key))
@@ -233,6 +235,17 @@ namespace CityAgent.Systems
                 PersistChatSession();
             }
 
+            // 3b. Drain pending heartbeat result (D-02, D-14)
+            string? hbResult = System.Threading.Interlocked.Exchange(
+                ref m_HeartbeatSystem.PendingHeartbeatResult, null);
+            if (hbResult != null && !IsHeartbeatSilent(hbResult))
+            {
+                m_History.Add(new ChatMessage { role = "assistant", content = hbResult });
+                PushMessagesBinding();
+                PersistChatSession(); // D-16: heartbeat observations saved to current session
+                // Note: m_IsLoading is NOT set to false here — heartbeat does not use the loading indicator
+            }
+
             // 4. Poll settings for UI dimension/font changes (~once per second)
             if (++m_SettingsPollCounter >= 60)
             {
@@ -363,6 +376,14 @@ namespace CityAgent.Systems
             string result = m_NarrativeMemory.DeleteFile(filename);
             m_MemoryOpResult.Update(result);
         }
+
+        /// <summary>
+        /// Returns true if the heartbeat result is a silence sentinel.
+        /// The AI returns "[silent]" or an empty string when nothing notable is happening (D-05).
+        /// </summary>
+        private static bool IsHeartbeatSilent(string result) =>
+            string.IsNullOrWhiteSpace(result) ||
+            result.Equals("[silent]", StringComparison.OrdinalIgnoreCase);
 
         private class ChatMessage
         {
