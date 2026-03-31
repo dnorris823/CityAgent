@@ -112,7 +112,30 @@
       "Bash(powershell -NoProfile -Command \":*)",
       "Bash(CS2_INSTALL_PATH=\"C:/Program Files \\(x86\\)/Steam/steamapps/common/Cities Skylines II\")",
       "Bash(export CS2_INSTALL_PATH)",
-      "Bash(powershell -Command \"\n\\\\$cs2 = 'C:/Program Files \\(x86\\)/Steam/steamapps/common/Cities Skylines II/Cities2_Data/Managed'\n@\\('UnityEngine.CoreModule','Unity.Entities','Unity.Mathematics','Unity.Collections','Colossal.Core','Game'\\) | ForEach-Object { [System.Reflection.Assembly]::LoadFrom\\(\\\\\"\\\\$cs2/\\\\$_.dll\\\\\"\\) } 2>\\\\$null | Out-Null\n\\\\$t = [System.AppDomain]::CurrentDomain.GetAssemblies\\(\\) | ForEach-Object { try { \\\\$_.GetType\\('Game.City.StatisticType'\\) } catch {} } | Where-Object { \\\\$_ }\nif \\(\\\\$t\\) { [System.Enum]::GetNames\\(\\\\$t\\) | Select-String -Pattern 'Income|Expense|Budget|Tax|Revenue|Balance|Money|Net' } else { 'StatisticType not found' }\n\")"
+      "Bash(powershell -Command \"\n\\\\$cs2 = 'C:/Program Files \\(x86\\)/Steam/steamapps/common/Cities Skylines II/Cities2_Data/Managed'\n@\\('UnityEngine.CoreModule','Unity.Entities','Unity.Mathematics','Unity.Collections','Colossal.Core','Game'\\) | ForEach-Object { [System.Reflection.Assembly]::LoadFrom\\(\\\\\"\\\\$cs2/\\\\$_.dll\\\\\"\\) } 2>\\\\$null | Out-Null\n\\\\$t = [System.AppDomain]::CurrentDomain.GetAssemblies\\(\\) | ForEach-Object { try { \\\\$_.GetType\\('Game.City.StatisticType'\\) } catch {} } | Where-Object { \\\\$_ }\nif \\(\\\\$t\\) { [System.Enum]::GetNames\\(\\\\$t\\) | Select-String -Pattern 'Income|Expense|Budget|Tax|Revenue|Balance|Money|Net' } else { 'StatisticType not found' }\n\")",
+      "Bash(node \"$HOME/.claude/get-shit-done/bin/gsd-tools.cjs\" state advance-plan)",
+      "Bash(node \"$HOME/.claude/get-shit-done/bin/gsd-tools.cjs\" state update-progress)",
+      "Bash(node \"$HOME/.claude/get-shit-done/bin/gsd-tools.cjs\" state record-metric --phase \"04-web-search-tool\" --plan \"02\" --duration \"5min\" --tasks \"2\" --files \"2\")",
+      "Bash(node \"$HOME/.claude/get-shit-done/bin/gsd-tools.cjs\" state add-decision --phase \"04-web-search-tool\" --summary \"Registration at OnCreate\\(\\) time — user must restart game session after adding Brave key \\(same pattern as Claude API key\\)\")",
+      "Bash(node \"$HOME/.claude/get-shit-done/bin/gsd-tools.cjs\" state add-decision --phase \"04-web-search-tool\" --summary \"Web search paragraph appended to DefaultSystemPrompt — not dynamically injected at request time \\(D-14\\)\")",
+      "Bash(node \"$HOME/.claude/get-shit-done/bin/gsd-tools.cjs\" state record-session --stopped-at \"Completed 04-02-PLAN.md\")",
+      "Bash(node \"$HOME/.claude/get-shit-done/bin/gsd-tools.cjs\" roadmap update-plan-progress \"4\")",
+      "Bash(node \"$HOME/.claude/get-shit-done/bin/gsd-tools.cjs\" requirements mark-complete SRCH-01 SRCH-03)",
+      "Bash(node $HOME/.claude/get-shit-done/bin/gsd-tools.cjs agent-skills gsd-verifier)",
+      "Bash(echo \"CS2_INSTALL_PATH: $CS2_INSTALL_PATH\")",
+      "Bash(ls \"C:/Program Files \\(x86\\)/Steam/steamapps/common/Cities Skylines II/Cities2_Data/Managed/Colossal.IO.AssetDatabase.dll\")",
+      "Bash(npm run:*)",
+      "Bash(node $HOME/.claude/get-shit-done/bin/gsd-tools.cjs agent-skills gsd-executor)",
+      "Bash(ls \"C:/Program Files \\(x86\\)/Steam/steamapps/common/Cities Skylines II/Cities2_Data/Managed/\")",
+      "Bash(node \"$HOME/.claude/get-shit-done/bin/gsd-tools.cjs\" roadmap update-plan-progress --phase \"05\" --plan \"05-03\" --status \"complete\")",
+      "Bash(node \"$HOME/.claude/get-shit-done/bin/gsd-tools.cjs\" roadmap update-plan-progress \"05\")",
+      "Bash(node \"$HOME/.claude/get-shit-done/bin/gsd-tools.cjs\" requirements mark-complete MEM-01 MEM-02 MEM-03 MEM-04)",
+      "Bash(node \"$HOME/.claude/get-shit-done/bin/gsd-tools.cjs\" commit \"test\\(05-03\\): human verification passed — memory explorer confirmed in-game\" --files \".planning/phases/05-memory-file-explorer/05-03-SUMMARY.md\" \".planning/ROADMAP.md\")",
+      "Bash(node \"$HOME/.claude/get-shit-done/bin/gsd-tools.cjs\" state record-metric --phase \"05\" --plan \"05-03\" --duration \"10min\" --tasks \"2\" --files \"1\")",
+      "Bash(node \"$HOME/.claude/get-shit-done/bin/gsd-tools.cjs\" state add-decision --phase \"05\" --summary \"No C# changes required during in-game verification — all bindings and triggers from Plans 01/02 worked correctly on first run\")",
+      "Bash(node \"$HOME/.claude/get-shit-done/bin/gsd-tools.cjs\" state add-decision --phase \"05\" --summary \"Post-checkpoint CSS fixes: ca-tabs flex width and ca-mem-list__icon min-width for Coherent GT layout differences vs desktop Chrome\")",
+      "Bash(node \"$HOME/.claude/get-shit-done/bin/gsd-tools.cjs\" state record-session --stopped-at \"Completed 05-03-PLAN.md — Phase 05 complete\")",
+      "Bash(ls '/c/Program Files \\(x86\\)/Steam/steamapps/common/Cities Skylines II/Cities2_Data/Managed/')"
     ]
   }
 }
