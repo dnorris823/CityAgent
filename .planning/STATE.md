@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: verifying
-stopped_at: Completed 05-03-PLAN.md — Phase 05 complete
-last_updated: "2026-03-31T04:07:24.813Z"
-last_activity: 2026-03-31
+stopped_at: Completed 06-01-PLAN.md — heartbeat settings and system registration
+last_updated: "2026-03-30T00:12:00.000Z"
+last_activity: 2026-03-30
 progress:
   total_phases: 6
   completed_phases: 5
   total_plans: 18
-  completed_plans: 15
-  percent: 11
+  completed_plans: 16
+  percent: 89
 ---
 
 # Project State
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-03-26)
 
 ## Current Position
 
-Phase: 06
-Plan: Not started
-Status: Phase complete — ready for verification
-Last activity: 2026-03-31
+Phase: 06-proactive-heartbeat
+Plan: 01 complete, 02 next
+Status: In progress — Plan 01 done
+Last activity: 2026-03-30
 
 Progress: [█░░░░░░░░░] 11%
 
@@ -65,6 +65,7 @@ Progress: [█░░░░░░░░░] 11%
 | Phase 05 P05-01 | 15min | 2 tasks | 2 files |
 | Phase 05 P05-02 | 20min | 2 tasks | 3 files |
 | Phase 05 P05-03 | 10min | 2 tasks | 1 files |
+| Phase 06 P06-01 | 12min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -103,6 +104,9 @@ Recent decisions affecting current work:
 - [Phase 05]: Synchronous WriteFile/DeleteFile added to NarrativeMemorySystem alongside async variants — sync for UI main thread, async for AI tool loop
 - [Phase 05]: No C# changes required during in-game verification — all bindings and triggers from Plans 01/02 worked correctly on first run
 - [Phase 05]: Post-checkpoint CSS fixes: ca-tabs flex width and ca-mem-list__icon min-width for Coherent GT layout differences vs desktop Chrome
+- [Phase 06-01]: HeartbeatIncludeScreenshot defaults to false — screenshots add API cost for background checks; player opts in explicitly
+- [Phase 06-01]: DefaultHeartbeatSystemPrompt uses [silent] sentinel for AI silence gating so CityAgentUISystem can suppress non-events without parsing response
+- [Phase 06-01]: HeartbeatEnabled defaults to false — no heartbeat fires on fresh install; player must opt in
 
 ### Pending Todos
 
@@ -116,5 +120,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-31T04:02:45.045Z
-Stopped at: Completed 05-03-PLAN.md — Phase 05 complete
+Stopped at: Completed 06-01-PLAN.md — heartbeat settings and HeartbeatSystem scheduling
 Resume file: None
