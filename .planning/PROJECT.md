@@ -35,7 +35,7 @@ You ask Claude something about your city, it sees the current screenshot and liv
 - ✓ **Chat UI polish** — 3-way message renderer (user=right blue, assistant=left dark, system=center pill), loading status text rotation, queued-message chip, welcome greeting — validated Phase 2
 - ✓ **Markdown rendering quality** — nested lists, Coherent GT-safe italic regex, fenced code language labels, bold+heading coexistence — validated Phase 2
 - ✓ **Loading / thinking indicator** — bouncing dots + rotating city-flavored status text; `<thinking>` blocks stripped from responses — validated Phase 2
-- [ ] **Memory file explorer** — in-panel file system view: browse the per-city narrative memory tree, view/edit/delete individual files
+- ✓ **Memory file explorer** — in-panel file system view: browse the per-city narrative memory tree, view/edit/delete individual files — validated Phase 5
 - ✓ **Web search tool** — `search_web(query)` agent tool backed by Brave Search API; API key + enable toggle in mod settings; Claude cites sources in responses — validated Phase 4
 - [ ] **Proactive heartbeat system** — Claude periodically checks city stats in the background and surfaces noteworthy events, anomalies, or suggestions; interval and behavior configurable
 - ✓ **Claude API format** — `ClaudeAPISystem` sends correct `/v1/messages` format; explicit provider toggle (Claude API / Ollama) in settings — validated Phase 1
@@ -50,7 +50,7 @@ You ask Claude something about your city, it sees the current screenshot and liv
 
 ## Context
 
-- **Codebase state**: Phase 4 complete. Claude now has access to 14 agent tools: 7 data tools + 6 memory tools + 1 web search tool (Brave Search API, conditional on settings). CityDataSystem caches 30+ ECS properties on a 128-frame throttle. All data tools have per-toggle controls in mod settings. Remaining planned features: memory file explorer, heartbeat system.
+- **Codebase state**: Phase 5 complete. Claude has 14 agent tools: 7 data tools + 6 memory tools + 1 web search tool. Players can browse, edit, and delete per-city narrative memory files from an in-panel Memory tab. Remaining planned feature: proactive heartbeat system.
 - **Persona**: Claude shifts roles based on context — narrating events (CityPlannerPlays energy), advising on strategy (urban planning expert), and chronicling the city's ongoing story (historian). The narrative memory system is the foundation of continuity.
 - **Tech environment**: Unity 2022.3.7f1 DOTS/ECS, .NET Standard 2.1 DLL, React/TypeScript in Coherent GT (CS2's embedded Chromium). No npm packages — React, react-dom, and cs2 bindings are runtime-injected externals.
 - **Developer**: Single developer, VSCode (not Visual Studio), working toward personal-use v1.
@@ -72,7 +72,7 @@ You ask Claude something about your city, it sees the current screenshot and liv
 | User-configurable model name | Allows switching between models without a code change | Implemented Phase 1 |
 | Web search via Brave/Bing in C# backend | Keeps search calls on the C# side (same HTTP client pattern); Claude calls a tool, C# fetches results | — Pending |
 | Heartbeat as background system | Periodic proactive checks need their own CS2 system update loop; design TBD | — Pending |
-| Memory explorer in React panel | File system view embedded in the chat panel; reads/writes via existing memory tool bindings | — Pending |
+| Memory explorer in React panel | File system view embedded in the chat panel; reads/writes via new C# bindings/triggers (not AI tool calls — direct file I/O) | Implemented Phase 5 |
 | Personal-use v1 (no Paradox Mods) | Validate the experience first; public release adds distribution complexity too early | — Pending |
 
 ## Evolution
